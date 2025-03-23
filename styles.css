@@ -1,0 +1,226 @@
+body {
+    font-family: Roboto, sans-serif;
+}
+@media (max-width: 768px) {
+    .table {
+        flex-direction: column;
+    }
+    .column {
+        min-height: 600px;
+        min-width: 100% !important;
+    }
+    .carousel {
+        margin-top: -10% !important;
+    }
+}
+
+.backGround {
+    z-index: -1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-height: 100%;
+    width: 100%;
+    background: linear-gradient(45deg, rgb(51, 54, 228), rgb(203, 103, 27), rgb(51, 54, 228));
+    background-size: 400% 400%;
+    animation: gradient 15s infinite alternate;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+.table {
+    margin-top: 5%;
+    column-count: 2;
+    display: flex;
+    justify-content: center;
+    height: 700px;
+}
+
+.column {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    min-width: 40%;
+    max-width: 30%;
+}
+
+.botCard {
+    background: rgb(28, 28, 28, 0.6);
+    color: white;
+    text-align: center;
+    padding: 10% 15%;
+    width: 60%;
+    border-radius: 26px;
+    box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(100px);
+    transition: transform 0.3s ease;
+}
+
+.botCard:hover {
+    transform: scale(1.02);
+}
+
+.avatar {
+    height: 130px;
+    transition: transform 0.3s ease;
+}
+.avatar:hover {
+    transform: scale(1.05);
+}
+
+.name {
+    padding-top: 16px;
+    font-size: 26px;
+    font-weight: bold;
+    line-height: 32px;
+}
+
+.username {
+    color: #7d7f81;
+    font-size: 15px;
+    line-height: 18px;
+    padding: 6px 16px 0;
+}
+
+.description {
+    font-size: 16px;
+    margin-bottom: 8px;
+    margin-top: 10px;
+}
+
+.start-btn {
+    background: linear-gradient(45deg, #2c47d6, #ec642a);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    transition:
+        transform 0.3s ease,
+        background-position 0.5s ease;
+    background-size: 200% 200%;
+}
+
+.start-btn:hover {
+    transform: scale(1.05);
+    background-position: 0% 100%;
+}
+
+.btns-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 28px;
+}
+
+.tooltip {
+    pointer-events: none;
+    position: absolute;
+    flex-direction: column;
+    display: flex;
+    transform: translateX(110%) translateY(-99%);
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    transition: 0.3s;
+    opacity: 0;
+}
+.tooltipShow {
+    opacity: 1;
+    pointer-events: auto;
+    padding-bottom: 35px;
+}
+
+.tooltip img {
+    width: 220px;
+}
+
+.tooltip .qrText {
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(89deg, #4066ff, #ff5006);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin-top: 5px;
+}
+
+.carousel {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    width: 80%;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+.carousel:hover {
+    transform: scale(1.05);
+}
+
+#carousel-text {
+    font-weight: 100;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.851);
+    position: absolute;
+    text-align: center;
+    width: 100%; /* Растягиваем текст по ширине контейнера */
+    transform: translateX(0%); /* Начинает справа */
+    opacity: 1;
+    transition:
+        transform 0.6s ease-out,
+        opacity 0.6s ease-out;
+}
+
+.phone {
+    z-index: -1;
+    height: 730px;
+    transition: transform 0.3s ease;
+    filter: drop-shadow(5px 5px 15px rgba(0, 0, 0, 0.5));
+}
+
+.card {
+    width: 300px;
+    height: 200px;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 20px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+}

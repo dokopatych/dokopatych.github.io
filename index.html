@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <title>Докопатыч</title>
+        <meta
+            name="description"
+            content="Бот поможет подобрать фильм по вашему вкусу. Быстро и бесплатно в Telegram."
+        />
+ 
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="images/round.png" />
+
+        <!-- Стили -->
+        <link rel="stylesheet" href="styles.css" /> 
+ 
+    </head>
+
+    <body>
+        <div class="backGround"></div>
+        <div class="table">
+            <div class="column">
+                <div class="botCard">
+                    <img src="./images/round.png" alt="Аватар" class="avatar" />
+                    <span class="name">Докопатыч</span>
+                    <span class="username">@DokopatychBot</span>
+                    <span class="description"
+                        >Бот для быстрого подбора фильмов и сериалов <br /><br />
+                        In memory of Jeff Baena
+                    </span>
+                    <div class="btns-container">
+                        <a href="tg://resolve?domain=DokopatychBot" class="start-btn"> DESKTOP </a>
+                        <a href="https://t.me/DokopatychBot" class="start-btn" target="_blank">
+                            WEB
+                        </a>
+                        <button class="start-btn" id="qrBtn">QR</button>
+
+                        <div class="tooltip" id="tooltip">
+                            <img src="./images/qr.png" alt="QR Code" />
+                            <span class="qrText">@DOKOPATYCHBOT</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel">
+                    <span id="carousel-text"
+                        >Вспоминаешь, какой фильм/сериал стал для тебя родным
+                    </span>
+                </div>
+            </div> 
+            <script src="script.js"></script>
+        </div> 
+    </body>
+</html>
