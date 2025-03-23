@@ -36,6 +36,11 @@ function startAutoChange() {
 	interval = setInterval(showNextPhrase, 5000);
 }
 
+document.querySelector('[class="carousel"]').addEventListener('click', (e) => {
+	isPaused = false;
+	showNextPhrase();
+});
+
 function stopAutoChange() {
 	clearInterval(interval);
 }
