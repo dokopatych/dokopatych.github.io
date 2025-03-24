@@ -2,9 +2,10 @@ body {
     font-family: Roboto, sans-serif;
 }
 @media (max-width: 768px) {
-    .botCard {
-    padding: 50px 50px;
-   }
+    html, body {
+        overflow-x: hidden; 
+      }
+     
    .table {
     height: 600px;
    }
@@ -195,6 +196,7 @@ body {
     transition:
         transform 0.6s ease-out,
         opacity 0.6s ease-out;
+    
 }
 
 .phone {
