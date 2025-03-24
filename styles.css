@@ -9,6 +9,9 @@ body {
    .table {
     height: 600px;
    }
+   .botCard {
+    padding: 60px 40px;
+   }
    .carousel {
     margin-top: -100px;
 }
@@ -176,7 +179,7 @@ body {
     align-items: center;
     font-size: 24px;
     font-weight: bold;
-    width: 80%;
+    width: 330px;
     position: relative;
     transition: transform 0.3s ease;
 }

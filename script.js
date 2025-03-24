@@ -1,14 +1,13 @@
 const phrases = [
-	"Вспоминаешь, какой фильм/сериал стал для тебя родным",
+	"Вспоминаешь, какой фильм или сериал стал для тебя родным",
 	"Присылаешь его мне",
 	"Прогоняю через алгоритм и подбираю тебе что-то ещё",
-	`Темы разные. Главное, 
-чтобы вайб был "как тогда"`,
+	`Темы разные. Главное, чтобы вайб был "как тогда"`,
 	"Выбирай по обложке, выбирай сердечком"
 ];
 
 const textElement = document.getElementById("carousel-text");
-let index = 0;
+let index = -1;
 let interval;
 let isPaused = false; // Флаг паузы
 
@@ -30,7 +29,7 @@ function showNextPhrase() {
 			textElement.style.transform = "translateX(0%)";
 			textElement.style.opacity = "1";
 		}, 50);
-	}, 1000);
+	}, 600);
 }
 
 function startAutoChange() {
