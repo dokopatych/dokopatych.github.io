@@ -2,16 +2,15 @@ body {
     font-family: Roboto, sans-serif;
 }
 @media (max-width: 768px) {
-    .table {
-        flex-direction: column;
-    }
-    .column {
-        min-height: 600px;
-        min-width: 100% !important;
-    }
-    .carousel {
-        margin-top: -10% !important;
-    }
+    .botCard {
+    padding: 50px 50px;
+   }
+   .table {
+    height: 600px;
+   }
+   .carousel {
+    margin-top: -100px;
+}
 }
 
 .backGround {
@@ -41,6 +40,7 @@ body {
     display: flex;
     justify-content: center;
     height: 700px;
+    justify-self: anchor-center;
 }
 
 .column {
@@ -49,15 +49,15 @@ body {
     align-items: center;
     flex-direction: column;
     text-align: center;
-    min-width: 40%;
-    max-width: 30%;
+    min-width: 40%; 
 }
 
-.botCard {
+.botCard { 
+    min-width: 300px;
     background: rgb(28, 28, 28, 0.6);
     color: white;
     text-align: center;
-    padding: 10% 15%;
+    padding: 60px 90px;
     width: 60%;
     border-radius: 26px;
     box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.3);
@@ -129,27 +129,33 @@ body {
 }
 
 .tooltip {
+    z-index: 1;
     pointer-events: none;
     position: absolute;
     flex-direction: column;
-    display: flex;
-    transform: translateX(110%) translateY(-99%);
+    top: 10%;
+    display: flex; 
     background: white;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
     text-align: center;
-    transition: 0.3s;
+    transition: 0.25s;
+    padding-bottom: 20px;
     opacity: 0;
 }
 .tooltipShow {
     opacity: 1;
+    top: 16%;
     pointer-events: auto;
-    padding-bottom: 35px;
+}
+
+.tooltipShow:hover {
+    transform: scale(1.02);
 }
 
 .tooltip img {
-    width: 220px;
+    width: 280px;
 }
 
 .tooltip .qrText {

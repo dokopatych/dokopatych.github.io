@@ -9,7 +9,12 @@
             name="description"
             content="Бот для быстрого подбора фильмов и сериалов. In memory of Jeff Baena."
         />
- 
+
+        <meta property="og:title" content="Докопатыч" />
+<meta property="og:description" content="Бот для быстрого подбора фильмов и сериалов. In memory of Jeff Baena." />
+<meta property="og:image" content="https://dokopatych.github.io/botpage/images/round-sm.png" />
+<meta property="og:url" content="https://dokopatych.github.io/botpage" />
+<meta property="og:type" content="website" />
 
         <!-- Favicon -->
         <link rel="icon" type="image/png" href="images/round-sm.png" />
@@ -23,6 +28,12 @@
         <div class="backGround"></div>
         <div class="table">
             <div class="column">
+
+                <div class="tooltip" id="tooltip">
+                    <img src="./images/qr.png" alt="QR Code" />
+                    <span class="qrText">@DOKOPATYCHBOT</span>
+                </div>
+
                 <div class="botCard">
                     <img src="./images/round-sm.png" alt="Аватар" class="avatar" />
                     <span class="name">Докопатыч</span>
@@ -31,18 +42,15 @@
                         >Бот для быстрого подбора фильмов и сериалов <br /><br />
                         In memory of Jeff Baena
                     </span>
+
                     <div class="btns-container">
-                        <a href="tg://resolve?domain=DokopatychBot" class="start-btn"> DESKTOP </a>
                         <a href="https://t.me/DokopatychBot" class="start-btn" target="_blank">
                             WEB
                         </a>
+                        <a href="tg://resolve?domain=DokopatychBot" class="start-btn"> DESKTOP </a>
                         <button class="start-btn" id="qrBtn">QR</button>
-
-                        <div class="tooltip" id="tooltip">
-                            <img src="./images/qr.png" alt="QR Code" />
-                            <span class="qrText">@DOKOPATYCHBOT</span>
-                        </div>
                     </div>
+
                 </div>
 
                 <div class="carousel">

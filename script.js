@@ -67,6 +67,15 @@ qrBtn.addEventListener('click', (e) => {
 	e.preventDefault();
 	tooltip.classList.toggle('tooltipShow')
 });
+
+document.addEventListener('click', (click) => {
+	const shownTooltip = document.querySelector('[class="tooltip tooltipShow"]')
+	if (shownTooltip) {
+		if (click.target.id != "qrBtn") {
+			shownTooltip.classList.toggle('tooltipShow')
+		}
+	}
+});
 // an
 document.querySelector(`[class="start-btn"]`).addEventListener("click", function () {
 	gtag('event', 'telegram_click', {
