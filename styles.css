@@ -1,20 +1,25 @@
 body {
     font-family: Roboto, sans-serif;
 }
+
 @media (max-width: 768px) {
-    html, body {
-        overflow-x: hidden; 
-      }
-     
-   .table {
-    height: 600px;
-   }
-   .botCard {
-    padding: 60px 40px;
-   }
-   .carousel {
-    margin-top: -100px;
-}
+
+    html,
+    body {
+        overflow-x: hidden;
+    }
+
+    .table {
+        height: 600px;
+    }
+
+    .botCard {
+        padding: 60px 40px;
+    }
+
+    .carousel {
+        margin-top: -100px;
+    }
 }
 
 .backGround {
@@ -33,6 +38,7 @@ body {
     0% {
         background-position: 0% 50%;
     }
+
     100% {
         background-position: 100% 50%;
     }
@@ -53,10 +59,10 @@ body {
     align-items: center;
     flex-direction: column;
     text-align: center;
-    min-width: 40%; 
+    min-width: 40%;
 }
 
-.botCard { 
+.botCard {
     min-width: 300px;
     background: rgb(28, 28, 28, 0.6);
     color: white;
@@ -80,6 +86,7 @@ body {
     height: 130px;
     transition: transform 0.3s ease;
 }
+
 .avatar:hover {
     transform: scale(1.05);
 }
@@ -138,7 +145,7 @@ body {
     position: absolute;
     flex-direction: column;
     top: 10%;
-    display: flex; 
+    display: flex;
     background: white;
     padding: 10px;
     border-radius: 10px;
@@ -148,6 +155,7 @@ body {
     padding-bottom: 20px;
     opacity: 0;
 }
+
 .tooltipShow {
     opacity: 1;
     top: 16%;
@@ -183,6 +191,7 @@ body {
     position: relative;
     transition: transform 0.3s ease;
 }
+
 .carousel:hover {
     transform: scale(1.05);
 }
@@ -193,13 +202,15 @@ body {
     color: rgba(255, 255, 255, 0.851);
     position: absolute;
     text-align: center;
-    width: 100%; /* Растягиваем текст по ширине контейнера */
-    transform: translateX(0%); /* Начинает справа */
+    width: 100%;
+    /* Растягиваем текст по ширине контейнера */
+    transform: translateX(0%);
+    /* Начинает справа */
     opacity: 1;
     transition:
         transform 0.6s ease-out,
         opacity 0.6s ease-out;
-    
+
 }
 
 .phone {

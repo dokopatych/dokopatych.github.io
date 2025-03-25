@@ -92,3 +92,18 @@ setTimeout(() => {
 	gtag('event', 'page_engagement', { 'event_category': 'User Engagement' });
 }, 5000);
 
+
+// page
+function detectDevice() {
+	const userAgent = navigator.userAgent.toLowerCase();
+	return /iphone|ipad|ipod|android|blackberry|opera mini|iemobile|mobile/.test(userAgent);
+}
+const btns = document.querySelector('[class="btns-container"]')
+const isMobile = detectDevice() || window.matchMedia("(max-width: 768px)").matches;
+
+
+if (isMobile) {
+	btns.innerHTML =
+		`<a href="https://t.me/DokopatychBot" class="start-btn" target="_blank">START </a> `
+}
+
