@@ -1,3 +1,2 @@
 User-agent: *
 Allow: /
-Sitemap: https://dokopatych.github.io/movie-bot-start/sitemap.xml
