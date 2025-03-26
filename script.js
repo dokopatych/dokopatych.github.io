@@ -77,6 +77,7 @@ document.addEventListener('click', (click) => {
 	}
 });
 // an
+/*
 document.querySelector(`[class="start-btn"]`).addEventListener("click", function () {
 	gtag('event', 'telegram_click', {
 		'event_category': 'Engagement',
@@ -91,7 +92,7 @@ window.addEventListener('scroll', function () {
 setTimeout(() => {
 	gtag('event', 'page_engagement', { 'event_category': 'User Engagement' });
 }, 5000);
-
+*/
 
 // page
 function detectDevice() {
