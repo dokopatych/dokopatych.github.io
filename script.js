@@ -1,64 +1,60 @@
-const phrases = [
-	"Вспоминаешь, какой фильм или сериал стал для тебя родным",
-	"Присылаешь его мне",
-	"Прогоняю через алгоритм и подбираю тебе что-то ещё",
-	`Темы разные. Главное, чтобы вайб был "как тогда"`,
-	"Выбирай по обложке, выбирай сердечком"
-];
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const textElement = document.getElementById("carousel-text");
-let index = -1;
+const texts = document.querySelectorAll('[class="carousel"]>h2')
+let index = 0;
+let isPaused = false;
 let interval;
-let isPaused = false; // Флаг паузы
 
-function showNextPhrase() {
-	if (isPaused) return; // Если пауза, не переключаем
+async function showNextPhrase() {
+	if (isPaused) return;
 
-	textElement.style.transform = "translateX(-100%)";
-	textElement.style.opacity = "0";
+	const current = texts[index];
+	current.style.transform = "translateX(-100%)";
+	current.style.opacity = "0";
 
-	setTimeout(() => {
-		index = (index + 1) % phrases.length;
-		textElement.textContent = phrases[index];
+	await sleep(600);
 
-		textElement.style.transition = "none"; // Убираем анимацию, чтобы мгновенно переместить вправо
-		textElement.style.transform = "translateX(100%)";
+	index = (index + 1) % texts.length;
+	const next = texts[index];
 
-		setTimeout(() => {
-			textElement.style.transition = "transform 0.6s ease-out, opacity 0.6s ease-out";
-			textElement.style.transform = "translateX(0%)";
-			textElement.style.opacity = "1";
-		}, 50);
-	}, 600);
+	next.style.transition = "none";
+	next.style.transform = "translateX(100%)";
+
+	await sleep(50);
+
+	next.style.transition = "transform 0.6s ease-out, opacity 0.6s ease-out";
+	next.style.transform = "translateX(0%)";
+	next.style.opacity = "1";
 }
 
-function startAutoChange() {
-	interval = setInterval(showNextPhrase, 5000);
+async function startAutoChange() {
+	interval = setInterval(showNextPhrase, 4000);
 }
-
-document.querySelector('[class="carousel"]').addEventListener('click', (e) => {
-	isPaused = false;
-	showNextPhrase();
-});
 
 function stopAutoChange() {
 	clearInterval(interval);
 }
 
-// Запускаем автоматическую смену фраз
+document.querySelector(".carousel").addEventListener("click", () => {
+	isPaused = false;
+	showNextPhrase();
+});
+
+texts.forEach((text) => {
+	text.addEventListener("mouseenter", () => {
+		isPaused = true;
+		stopAutoChange();
+	});
+
+	text.addEventListener("mouseleave", () => {
+		isPaused = false;
+		startAutoChange();
+	});
+});
+
+// Изначально показываем первую фразу и запускаем смену 
 startAutoChange();
 
-// Останавливаем анимацию при наведении
-textElement.addEventListener("mouseenter", () => {
-	isPaused = true;
-	stopAutoChange();
-});
-
-// Возобновляем анимацию при уходе курсора
-textElement.addEventListener("mouseleave", () => {
-	isPaused = false;
-	startAutoChange();
-});
 
 const qrBtn = document.querySelector('[id="qrBtn"]')
 const tooltip = document.querySelector('[id="tooltip"]')
