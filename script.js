@@ -13,7 +13,7 @@ async function showNextPhrase() {
 	current.style.opacity = "0";
 
 	await sleep(600);
-
+	current.classList.toggle('rolled') // TODO fix overlay
 	index = (index + 1) % texts.length;
 	const next = texts[index];
 
@@ -25,6 +25,8 @@ async function showNextPhrase() {
 	next.style.transition = "transform 0.6s ease-out, opacity 0.6s ease-out";
 	next.style.transform = "translateX(0%)";
 	next.style.opacity = "1";
+
+	await sleep(1500);
 }
 
 async function startAutoChange() {
