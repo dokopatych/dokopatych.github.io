@@ -6,25 +6,6 @@ h3 {
     margin-block-end: 0.7em;
 }
 
-@media (max-width: 768px) {
-
-    html,
-    body {
-        overflow-x: hidden;
-    }
-
-    .table {
-        height: 600px;
-    }
-
-    .botCard {
-        padding: 60px 40px;
-    }
-
-    .carousel {
-        margin-top: -100px;
-    }
-}
 
 .backGround {
     z-index: -1;
@@ -61,8 +42,7 @@ h3 {
     align-items: center;
     flex-direction: column;
     text-align: center;
-    min-width: 40%;
-    max-width: 60%;
+    min-width: 40%; 
 }
 
 .botCard {
@@ -226,6 +206,7 @@ h3 {
 
 .faq {
     margin-top: 100px;
+    margin-bottom: 300px;
     width: 420px;  
 }
 .faqCard { 
