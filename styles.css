@@ -12,7 +12,7 @@ h3 {
     body {
         overflow-x: hidden;
     } 
-    
+
     .botCard {
         padding: 0;
         width: auto;
@@ -225,7 +225,7 @@ h3 {
     width: 420px;  
 }
 .faqCard { 
-    padding: 30px;
+    padding: 40px;
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.2);
     border-radius: 15px;
