@@ -1,24 +1,19 @@
 body {
     font-family: Roboto, sans-serif;
+    display: flex;
+    justify-content: center;
 }
+
 h3 {
     margin-block-start: 0;
     margin-block-end: 0.7em;
 }
 
 @media (max-width: 768px) {
- 
-    html,
-    body {
-        overflow-x: hidden;
-    } 
+  
 
-    .botCard {
-        padding: 0;
-        width: auto;
-        min-width: auto;
-    }
 }
+
 .backGround {
     z-index: -1;
     position: fixed;
@@ -42,28 +37,28 @@ h3 {
 }
 
 .table {
-    margin-top: 5%; 
+    margin-top: 5%;
     display: flex;
-    justify-content: center; 
+    justify-content: center;
     justify-self: anchor-center;
 }
 
 .column {
     display: flex;
-    justify-content: space-around;
     align-items: center;
     flex-direction: column;
-    text-align: center;
-    min-width: 40%; 
+    margin: 40px;
+    gap: 90px;
+    max-width:600px;
+    min-width:300px;
 }
 
 .botCard {
-    min-width: 300px;
     background: rgb(28, 28, 28, 0.6);
     color: white;
     text-align: center;
-    padding: 60px 90px;
-    width: 60%;
+    width: -webkit-fill-available;
+    padding: 60px 30px;
     border-radius: 26px;
     box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.3);
     display: flex;
@@ -176,55 +171,13 @@ h3 {
     margin-top: 5px;
 }
 
-.carousel {
-    height: 220px;
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    width: 330px;
-    position: relative;
-    transition: transform 0.3s ease;
-}
-
-.carousel:hover {
-    transform: scale(1.05);
-}
-
-.carousel-text {
-    font-weight: 100;
-    cursor: pointer;
-    color: rgba(255, 255, 255, 0.851);
-    position: absolute;
-    text-align: center;
-    width: 100%;
-    /* Растягиваем текст по ширине контейнера */
-    transform: translateX(0%);
-    /* Начинает справа */
-    opacity: 0;
-    transition:
-        transform 0.6s ease-out,
-        opacity 0.6s ease-out;
-
-}
-.carousel-text .rolled {
-    opacity: 0
-}
-
-.phone {
-    z-index: -1;
-    height: 730px;
-    transition: transform 0.3s ease;
-    filter: drop-shadow(5px 5px 15px rgba(0, 0, 0, 0.5));
-}
-
 .faq {
-    margin-top: 100px;
-    margin-bottom: 300px;
-    width: 420px;  
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
-.faqCard { 
+
+.faqCard {
     padding: 40px;
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.2);
@@ -235,14 +188,34 @@ h3 {
     transition: transform 0.3s ease;
     text-wrap-style: balance;
     text-align: start;
-    margin-top: 20px;
 }
 
 .faqCard:hover {
-    transform: scale(1.05);
+    transform: scale(1.01);
 }
 
 .container {
     display: flex;
     gap: 20px;
+}
+
+.swiper {
+    width: 100%;
+}
+
+.swiper-wrapper {
+    align-items: anchor-center;
+}
+
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-items: anchor-center;
+    font-size: 24px;
+    font-weight: 100;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.851);
+    text-align: center;
+    transition: transform 0.6s ease-out, opacity 0.6s ease-out;
 }
