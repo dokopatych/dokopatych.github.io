@@ -139,11 +139,10 @@
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        new Swiper('.swiper', {
+        const swiper = new Swiper('.swiper', {
             direction: 'horizontal',
             slidesPerView: 1,
             allowTouchMove: true,
-            grabCursor: true,
             mousewheel: true,
             loop: true,
             keyboard: {
@@ -151,11 +150,16 @@
                 onlyInViewport: false,
             },
             autoplay: {
-                delay: 2000, // Переключение каждые 2 секунды
-                disableOnInteraction: false, // Продолжать автопрокрутку после взаимодействия
+                delay: 3000,
+                disableOnInteraction: false,
             },
-            pauseOnMouseEnter: true, 
+            pauseOnMouseEnter: true,
+            simulateTouch: true,
         });
+        swiper.el.addEventListener('click', () => {
+            swiper.slideNext();
+        });
+
     </script>
 </body>
 

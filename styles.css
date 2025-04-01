@@ -47,10 +47,10 @@ h3 {
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin: 40px;
+    margin: 40px 40px 300px 40px;
     gap: 90px;
-    max-width:600px;
-    min-width:300px;
+    max-width: 600px;
+    min-width: 370px;
 }
 
 .botCard {
