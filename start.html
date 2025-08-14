@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YZ78JBVPPD"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-YZ78JBVPPD');
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="yandex-verification" content="24980ce091a40523" />
+
+    <title>Докопатыч. Подбор фильмов и сериалов</title>
+    <meta name="description"
+        content="Телеграм бот для быстрого подбора фильма наподобие вашего любимого фильма. Собираю тебе несколько списков с чем-то, что может тебе тоже понравиться. Часто попадаются малоизвестные фильмы и сериалы, которые смотрели полтора человека на планете, но они хороши 🐻" />
+
+    <meta name="application-name" content="Докопатыч | Фильмы наподобие вашего любимого фильма" />
+    <meta property="og:title" content="Докопатыч | Фильмы наподобие вашего любимого фильма" />
+    <meta property="og:site_name" content="Докопатыч | Фильмы наподобие вашего любимого фильма" />
+
+    <meta property="og:description"
+        content="Телеграм бот для быстрого подбора фильма наподобие вашего любимого фильма. Собираю тебе несколько списков с чем-то, что может тебе тоже понравиться. Часто попадаются малоизвестные фильмы и сериалы, которые смотрели полтора человека на планете, но они хороши 🐻" />
+
+    <meta property="og:image" content="https://dokopatych.github.io/images/square.webp" />
+    <meta property="og:url" content="https://dokopatych.github.io/" />
+    <meta property="og:type" content="website" />
+
+    <link rel="canonical" href="https://dokopatych.github.io/">
+
+    <!-- Favicon --> 
+    <link rel="icon" href="https://dokopatych.github.io/images/round-sm.ico" type="image/x-icon"> 
+    <link rel="shortcut icon" href="https://dokopatych.github.io/images/round-sm.ico" />
+
+    <!-- Стили -->
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script type="application/ld+json">
+            {
+              "@context": "http://schema.org/",
+              "@type": "Service",
+              "name": "Подбор фильмов и сериалов",
+              "provider": {
+                "@type": "Organization",
+                "name": "Dokopatych",
+                "url": "https://dokopatych.github.io/"
+              },
+              "audience": {
+                "@type": "Audience",
+                "audienceType": "Киноманы"
+              },
+              "serviceType": "Фильмы и сериалы",
+              "offers": {
+                "@type": "Offer",
+                "price": "Free",
+                "priceCurrency": "RUB"
+              }
+            }
+            </script>
+        <!-- Yandex.Metrika counter -->
+        <script type="text/javascript" >
+            (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+        
+            ym(103218568, "init", {
+                clickmap:true,
+                trackLinks:true,
+                accurateTrackBounce:true,
+                webvisor:true
+            });
+        </script>
+        <noscript><div><img src="https://mc.yandex.ru/watch/103218568" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+        <!-- /Yandex.Metrika counter --> 
+</head>
+
+<body>
+	<script>
+		const BOT_USERNAME = 'DkptchStageBot'; // тестовый
+		const COUNTER_ID = 103218568; // твой ID счётчика
+	
+		ym(COUNTER_ID, 'getClientID', function(clientId) {
+			const params = new URLSearchParams({
+		clientId,
+		utm_source: 'direct',
+		promo: '123'
+	});
+	const tgLink = `https://t.me/${BOT_USERNAME}?start=${params.toString()}`;
+			window.location.href = tgLink;
+		});
+	</script>
+</body>
+
+</html>
