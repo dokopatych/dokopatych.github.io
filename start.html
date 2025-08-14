@@ -86,15 +86,16 @@
 		const COUNTER_ID = 103218568; // docoRedirect
 	
 		ym(COUNTER_ID, 'getClientID', function(clientId) {
-      const params = new URLSearchParams({
-	clientId,
-	page: 'docoRedirect',
-	promo: '123'
-});
- 
-const tgLink = `https://t.me/${BOT_USERNAME}?start=${encodeURIComponent(params.toString())}`;
 
-window.location.href = tgLink;
+      const params = {
+      cId: clientId,
+      page: 2
+    }  
+    const compressed = btoa(JSON.stringify(params)) 
+    
+    const tgLink = `https://t.me/${BOT_USERNAME}?start=${compressed}`;
+ 
+    window.location.href = tgLink;
 
 		});
 	</script>
