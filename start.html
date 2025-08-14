@@ -83,16 +83,19 @@
 <body>
 	<script>
 		const BOT_USERNAME = 'DkptchStageBot'; // тестовый
-		const COUNTER_ID = 103218568; // твой ID счётчика
+		const COUNTER_ID = 103218568; // docoRedirect
 	
 		ym(COUNTER_ID, 'getClientID', function(clientId) {
-			const params = new URLSearchParams({
-		clientId,
-		utm_source: 'direct',
-		promo: '123'
-	});
-	const tgLink = `https://t.me/${BOT_USERNAME}?start=${params.toString()}`;
-			window.location.href = tgLink;
+      const params = new URLSearchParams({
+	clientId,
+	page: 'docoRedirect',
+	promo: '123'
+});
+ 
+const tgLink = `https://t.me/${BOT_USERNAME}?start=${encodeURIComponent(params.toString())}`;
+
+window.location.href = tgLink;
+
 		});
 	</script>
 </body>
