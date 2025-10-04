@@ -75,26 +75,30 @@
 
 <body>
 	<script>
-		const BOT_USERNAME = 'DokopatychBot';
+    const handleLink = async function (){
+ 		const BOT_USERNAME = 'DokopatychBot';
 		const COUNTER_ID = 103218568; // docoRedirect
 		let tgLink = `https://t.me/${BOT_USERNAME}`;
     const isYbaip = document.URL.includes("?ybaip=1") ? 1 : 0
-    const isRef = document.referrer.includes("?ybaip=1") ? 1 : 0
+    const isRef = document?.referrer?.includes("?ybaip=1") ? 1 : 0
     const isFromDirect = isYbaip || isRef
 	
-		ym(COUNTER_ID, 'getClientID', function(clientId) {
+		await ym(COUNTER_ID, 'getClientID', async function(clientId) {
       const params = {
       cId: clientId,
       p: 2,
       d: isFromDirect
     }
     
-    const str = JSON.stringify(params)
+    const str = await JSON.stringify(params)
     const compressed = btoa(str)  
      tgLink = `${tgLink}?start=${compressed}`;
 		});
+    console.log(tgLink)
 
-    window.location.href = tgLink; 
+   window.location.href = tgLink; 
+  }
+    handleLink()
 	</script>
 </body>
 
