@@ -2,25 +2,15 @@
 <html lang="ru">
 
 <head>
-     
-        <!-- Yandex.Metrika counter -->
-        <script type="text/javascript" >
-          (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-          m[i].l=1*new Date();
-          for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-          k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-          (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-      
-          ym(103218568, "init", {
-              clickmap:true,
-              trackLinks:true,
-              accurateTrackBounce:true,
-              webvisor:true
-          });
-      </script>
-      <noscript><div><img src="https://mc.yandex.ru/watch/103218568" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-      <!-- /Yandex.Metrika counter --> 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YZ78JBVPPD"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
+        gtag('config', 'G-YZ78JBVPPD');
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="yandex-verification" content="24980ce091a40523" />
@@ -71,40 +61,159 @@
               }
             }
             </script>
+        <!-- Yandex.Metrika counter -->
+        <script type="text/javascript" >
+            (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+        
+            ym(103218568, "init", {
+                clickmap:true,
+                trackLinks:true,
+                accurateTrackBounce:true,
+                webvisor:true
+            });
+        </script>
+        <noscript><div><img src="https://mc.yandex.ru/watch/103218568" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+        <!-- /Yandex.Metrika counter --> 
+        <script>
+          const handleLink = async function () {
+            const BOT_USERNAME = 'DokopatychBot';
+            const COUNTER_ID = 103218568; // docoRedirect
+            let tgLink = `https://t.me/${BOT_USERNAME}`;
+            const isYbaip = document?.URL?.includes("?ybaip=1") ? 1 : 0
+            const isRef = document?.referrer?.includes("?ybaip=1") ? 1 : 0
+            const isFromDirect = isYbaip || isRef
+          
+            await ym(COUNTER_ID, 'getClientID', async function(clientId) {
+                const params = {
+                cId: clientId,
+                p: 2,
+                d: isFromDirect
+              }
+              
+              const str = await JSON.stringify(params)
+              const compressed = btoa(str)  
+              tgLink = `${tgLink}?start=${compressed}`;
+              ym(103218568,'reachGoal','loadedCounter')
+              return tgLink
+            });
+        
+            window.location.href = tgLink; 
+        }
+        try {
+          handleLink()
+        } catch {
+          ym(103218568,'reachGoal','loadError')
+        }
+        </script>
 </head>
 
 <body>
-	<script>
-    const handleLink = async function () {
-      const BOT_USERNAME = 'DokopatychBot';
-      const COUNTER_ID = 103218568; // docoRedirect
-      let tgLink = `https://t.me/${BOT_USERNAME}`;
-      const isYbaip = document?.URL?.includes("?ybaip=1") ? 1 : 0
-      const isRef = document?.referrer?.includes("?ybaip=1") ? 1 : 0
-      const isFromDirect = isYbaip || isRef
-    
-      await ym(COUNTER_ID, 'getClientID', async function(clientId) {
-          const params = {
-          cId: clientId,
-          p: 2,
-          d: isFromDirect
-        }
-        
-        const str = await JSON.stringify(params)
-        const compressed = btoa(str)  
-        tgLink = `${tgLink}?start=${compressed}`;
-        ym(103218568,'reachGoal','loadedCounter')
-        return tgLink
-      });
+    <div class="backGround"></div>
 
-      window.location.href = tgLink; 
-  }
-  try {
-    handleLink()
-  } catch {
-    ym(103218568,'reachGoal','loadError')
-  }
-	</script>
+    <div class='column'>
+        <div class="tooltip" id="tooltip">
+            <img src="./images/qr.webp" alt="QR-код для Telegram бота Докопатыч" />
+            <span class="qrText">@DOKOPATYCHBOT</span>
+        </div>
+
+        <div class="botCard">
+            <img src="./images/round-sm.webp" alt="Аватар" class="avatar" />
+            <span class="name">Докопатыч</span>
+            <span class="username">@DokopatychBot</span>
+            <h1 class="description">Бот для быстрого подбора кино <br /><br />
+                In memory of Jeff Baena
+            </h1>
+            <div class="btns-container">
+                <a href="https://t.me/DokopatychBot?start=landing" class="start-btn" target="_blank">
+                    WEB
+                </a>
+                <a href="tg://resolve?domain=DokopatychBot" class="start-btn"> DESKTOP </a>
+                <button class="start-btn" id="qrBtn">QR</button>
+            </div>
+        </div>
+
+        <div class="swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">Ищешь, что посмотреть</div>
+                <div class="swiper-slide">Вспоминаешь, какой фильм или сериал стал для тебя родным</div>
+                <div class="swiper-slide">Присылаешь его мне</div>
+                <div class="swiper-slide">Прогоняю через алгоритм и подбираю тебе что-то ещё наподобие</div>
+                <div class="swiper-slide">Темы разные. Главное, чтобы вайб был "как тогда"</div>
+                <div class="swiper-slide">Выбирай по обложке, выбирай сердечком</div>
+            </div>
+        </div>
+
+        <div class="faq">
+            <div class="faqCard">
+                <h3>Я делаю проще откапывание фильмов и сериалов 🎬🪤🐻</h3>
+
+                Ты присылаешь мне фильм или сериал, а я собираю тебе несколько списков с чем-то, что может тебе тоже
+                понравиться. Часто попадаются малоизвестные фильмы и сериалы, которые смотрели полтора человека на
+                планете, но они хороши.
+            </div>
+
+            <div class="faqCard">
+                <h3>Как я подбираю</h3>
+
+                У меня мега хитрый алгоритм с использованием квантовых вычислений и секретных методик фбр. Картины
+                могут быть не связаны темами или жанрами, здесь связь более глубокая. Рекомендации часто
+                неожиданные. Если тебе интересны просто темы космоса или пиратов, то лучше обратиться к гуглу или
+                gpt.
+
+                Но если ты ищешь что-то, что вовлечёт тебя <b>✨как тогда✨</b>,то здесь ко мне🫡
+            </div>
+
+            <div class="faqCard">
+                <h3>Как выбирать</h3>
+                Рекомендую ориентироваться только на название и обложку, выбирай сердечком🫀
+            </div>
+
+            <div class="faqCard">
+                <h3>Кто такой этот ваш Джефф Баена</h3>
+                Это малоизвестный инди-сценарист и режиссёр, он упоминается в описании бота. Автору бота хотелось
+                бы, чтобы такие как Джефф получали больше внимания при жизни, не смотря на низкую распиаренность.
+            </div>
+
+            <div class="faqCard">
+                <h3>Откуда столько фильмов</h3>
+                Источник сырых данных для алгоритма: TMDB. Он самый запаристый, самый наполненный и актуальный, есть
+                вообще всё. Не стесняйся искать что угодно.
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper('.swiper', {
+            direction: 'horizontal',
+            slidesPerView: 1,
+            allowTouchMove: true,
+            mousewheel: true,
+            loop: true,
+            keyboard: {
+                enabled: true,
+                onlyInViewport: false,
+            },
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false,
+            },
+            pauseOnMouseEnter: true,
+            simulateTouch: true,
+        });
+        swiper.el.addEventListener('click', () => {
+            swiper.slideNext();
+        });
+
+    </script>
 </body>
 
 </html>
+
+
+
+
