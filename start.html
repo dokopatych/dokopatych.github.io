@@ -76,10 +76,8 @@
                 webvisor:true
             });
         </script>
-        <noscript><div><img src="https://mc.yandex.ru/watch/103218568" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-        <!-- /Yandex.Metrika counter --> 
         <script>
-          const handleLink = async function () {
+        const handleLink = async function () {
             const BOT_USERNAME = 'DokopatychBot';
             const COUNTER_ID = 103218568; // docoRedirect
             let tgLink = `https://t.me/${BOT_USERNAME}`;
@@ -87,20 +85,48 @@
             const isRef = document?.referrer?.includes("?ybaip=1") ? 1 : 0
             const isFromDirect = isYbaip || isRef
           
-            await ym(COUNTER_ID, 'getClientID', async function(clientId) {
-                const params = {
-                cId: clientId,
+            let cId;
+
+            // 1. Асинхронно получаем ID и ждем его
+            let ymClientId = await new Promise((resolve) => {
+                // Проверяем, есть ли ym, чтобы избежать ошибки
+                if (typeof ym === 'function') {
+                    ym(COUNTER_ID, 'getClientID', (clientId) => {
+                        console.log('clientId in ym', clientId);
+                        resolve(clientId);
+                    });
+                } else {
+                    // Если ym не загружен, немедленно разрешаем null
+                    resolve(null);
+                }
+            });
+
+            // 2. Обработка полученного ID
+            if (ymClientId) {
+                // ID пришел чистый (1754690997656728029), просто используем его
+                cId = ymClientId; 
+                ym(COUNTER_ID, 'reachGoal', 'loadedCounter');
+            } else {
+                // ymClientId не пришел (вероятно, не успел или ym не было)
+                console.log('no ymClientId by getClientID, using localStorage');
+                // Получаем из localStorage и очищаем от кавычек, если они есть
+                cId = localStorage._ym_uid ? localStorage._ym_uid.replace(/"/g, '') : null;
+                ym(COUNTER_ID, 'reachGoal', 'loadError');
+            }
+
+            // 3. Формирование ссылки
+            const params = {
+                cId, // Теперь cId - чистая строка '1754690997656728029'
                 p: 2,
                 d: isFromDirect
-              }
-              
-              const str = await JSON.stringify(params)
-              const compressed = btoa(str)  
-              tgLink = `${tgLink}?start=${compressed}`;
-              ym(103218568,'reachGoal','loadedCounter')
-              return tgLink
-            });
-        
+            }
+
+            // ... остальной код ...
+            const str = JSON.stringify(params) // Будет {"cId":"1754690997656728029","p":2,"d":0}
+            console.log('str', str) 
+            const compressed = btoa(str)
+            tgLink = `${tgLink}?start=${compressed}`;
+           
             window.location.href = tgLink; 
         }
         try {
@@ -109,6 +135,9 @@
           ym(103218568,'reachGoal','loadError')
         }
         </script>
+        <noscript><div><img src="https://mc.yandex.ru/watch/103218568" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+        <!-- /Yandex.Metrika counter --> 
+          
 </head>
 
 <body>
