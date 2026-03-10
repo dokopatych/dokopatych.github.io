@@ -1,0 +1,11 @@
+# Dokopatych landing pages
+
+> Telegram-бот Докопатыч: поиск музыки, аудиокниг, фильмов, игр и других файлов.
+
+## Основные страницы
+- / — главная страница
+- /music-search-bot.html — поиск музыки
+- /audiobook-search-bot.html — поиск аудиокниг
+- /film-download-bot.html — поиск фильмов и сериалов
+- /game-search-bot.html — поиск игр
+- /file-search-bot.html — поиск любых файлов
