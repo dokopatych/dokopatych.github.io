@@ -1,8 +1,7 @@
 html,
 body {
     margin: 0;
-    min-height: 100%;
-    background: #1a1d68;
+    min-height: 100%; 
     font-family: Roboto, sans-serif;
     display: flex;
     justify-content: center;
@@ -14,7 +13,8 @@ body {
     bottom: 16px;
     transform: translateX(-50%);
     color: rgba(255, 255, 255, 0.45);
-    font-size: 22px;
+    font-size: 42px;
+    font-weight: bolder;
     line-height: 1;
     pointer-events: none;
     opacity: 0;
