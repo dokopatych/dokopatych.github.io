@@ -130,30 +130,6 @@ const applyLocalizedContent = (lang) => {
 	return t;
 };
 
-
-const ensureScrollHint = () => {
-	if (document.querySelector('[data-scroll-hint="true"]')) return;
-
-	const hint = document.createElement('div');
-	hint.className = 'scrollHint';
-	hint.setAttribute('data-scroll-hint', 'true');
-	hint.setAttribute('aria-hidden', 'true');
-	hint.textContent = '⌄';
-	document.body.appendChild(hint);
-
-	const toggleScrollHint = () => {
-		const scrollTop = window.scrollY || document.documentElement.scrollTop;
-		const viewportHeight = window.innerHeight;
-		const pageHeight = document.documentElement.scrollHeight;
-		const canScrollDown = pageHeight - (scrollTop + viewportHeight) > 4;
-		hint.classList.toggle('scrollHintVisible', canScrollDown);
-	};
-
-	window.addEventListener('scroll', toggleScrollHint, { passive: true });
-	window.addEventListener('resize', toggleScrollHint);
-	toggleScrollHint();
-};
-
 const selectedLanguage = getPreferredLanguage();
 const localizedContent = applyLocalizedContent(selectedLanguage);
 
@@ -178,5 +154,3 @@ const isMobile = detectDevice() || window.matchMedia('(max-width: 768px)').match
 if (isMobile && btns) {
 	btns.innerHTML = `<a href="https://t.me/DokopatychBot" class="start-btn" target="_blank">${localizedContent.mobileCta}</a>`;
 }
-
-ensureScrollHint();
