@@ -53,6 +53,7 @@
             <div class="faqCard"><h3>Что умеет бот</h3><p>Бот создан для поиска фильмов и сериалов. Работает в Telegram и не требует авторизации на внешних площадках.</p></div>
             <div class="faqCard"><h3>Какие запросы подходят</h3><p>Можно искать фильмы, сериалы и режиссёрские версии, в том числе редкие раздачи и нестандартные названия.</p></div>
             <div class="faqCard"><h3>Как выдаются результаты</h3><p>Бот находит фильмы и сериалы в разных форматах. Результаты выдаются в удобном формате прямо в Telegram.</p></div>
+            <div class="faqCard"><h3 data-popular-movies-title>Популярные фильмы недели</h3><ul data-popular-movies></ul></div>
             <div class="faqCard"><h3>Навигация</h3><ul>
                 <li><a href="/">Главная страница</a></li>
                 <li><a href="/music-search-bot.html">Музыка</a></li>
@@ -63,6 +64,17 @@
             </ul></div>
         </div>
     </div>
+    <script src="movies.js"></script>
+    <script>
+        window.FILM_DOWNLOAD_PAGE_CONFIG = {
+            title: 'Что скачать: популярные фильмы недели',
+            movies: window.popularMovies,
+            limit: 20,
+            emptyText: 'Список фильмов скоро обновится.',
+            linkType: 'intent',
+        };
+    </script>
+    <script src="seo-intent-page.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

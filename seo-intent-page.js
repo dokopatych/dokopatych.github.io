@@ -7,6 +7,8 @@ const COMMON_NAV_LINKS = [
   { href: '/file-search-bot.html', label: 'Поиск файлов и медиа' },
 ];
 
+const TELEGRAM_MOVIE_SEARCH_PREFIX = 'https://t.me/getTorrentFileBot?start=searchTr-';
+
 function fillMeta(config) {
   document.title = config.title;
   const set = (selector, attr, value) => {
@@ -63,6 +65,43 @@ function renderJsonLd(config) {
   if (el) el.textContent = JSON.stringify(jsonLd);
 }
 
+function buildMovieDeepLink(movieId) {
+  return `${TELEGRAM_MOVIE_SEARCH_PREFIX}${movieId}-movie-lnd`;
+}
+
+function buildMovieIntentLink(movieId) {
+  return `/skachat-film-${movieId}.html`;
+}
+
+function resolveMovieLink(movie, config = {}) {
+  if (config.linkType === 'intent') {
+    return buildMovieIntentLink(movie.id);
+  }
+
+  return buildMovieDeepLink(movie.id);
+}
+
+function renderPopularMovies(config = {}) {
+  const container = document.querySelector('[data-popular-movies]');
+  if (!container) return;
+
+  const source = Array.isArray(config.movies) ? config.movies : [];
+  const limit = Number.isFinite(config.limit) ? config.limit : source.length;
+  const items = source.slice(0, limit).filter((movie) => movie && movie.id && movie.title);
+
+  if (!items.length) {
+    container.innerHTML = `<li>${config.emptyText || 'Список скоро обновится.'}</li>`;
+    return;
+  }
+
+  const target = config.linkType === 'intent' ? '_self' : '_blank';
+  const rel = config.linkType === 'intent' ? '' : ' rel="noopener"';
+
+  container.innerHTML = items
+    .map((movie) => `<li><a href="${resolveMovieLink(movie, config)}" target="${target}"${rel}>${movie.title}</a></li>`)
+    .join('');
+}
+
 function initIntentPage(config) {
   fillMeta(config);
   renderFaq(config);
@@ -74,6 +113,19 @@ function initIntentPage(config) {
   }
 }
 
+function initFilmDownloadPage(config = {}) {
+  const title = document.querySelector('[data-popular-movies-title]');
+  if (title && config.title) {
+    title.textContent = config.title;
+  }
+
+  renderPopularMovies(config);
+}
+
 if (window.INTENT_PAGE_CONFIG) {
   initIntentPage(window.INTENT_PAGE_CONFIG);
+}
+
+if (window.FILM_DOWNLOAD_PAGE_CONFIG) {
+  initFilmDownloadPage(window.FILM_DOWNLOAD_PAGE_CONFIG);
 }
