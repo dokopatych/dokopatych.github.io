@@ -19,6 +19,25 @@ const SEO_BASE_PAGES = [
   { loc: `${BASE_URL}/skachat-serial-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
 ];
 
+const MEDIA_COPY = {
+  movie: {
+    nounAccusative: 'фильм',
+    nounGenitive: 'фильма',
+    nounPlural: 'фильмы',
+    headingPlural: 'фильмы',
+    applicationName: 'Докопатыч | Поиск фильмов',
+    telegramType: 'movie',
+  },
+  tv: {
+    nounAccusative: 'сериал',
+    nounGenitive: 'сериала',
+    nounPlural: 'сериалы',
+    headingPlural: 'сериалы',
+    applicationName: 'Докопатыч | Поиск сериалов',
+    telegramType: 'tv',
+  },
+};
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -32,29 +51,40 @@ function moviePagePath(movieId) {
   return `skachat-film-${movieId}.html`;
 }
 
-function movieDeepLink(movieId) {
-  return `https://t.me/getTorrentFileBot?start=searchTr-${movieId}-movie-lnd`;
+function resolveMediaType(mediaType) {
+  return mediaType === 'tv' ? 'tv' : 'movie';
+}
+
+function resolveMediaCopy(mediaType) {
+  return MEDIA_COPY[resolveMediaType(mediaType)];
+}
+
+function movieDeepLink(movie) {
+  const media = resolveMediaCopy(movie.media_type);
+  return `https://t.me/getTorrentFileBot?start=searchTr-${movie.id}-${media.telegramType}-lnd`;
 }
 
 function buildIntentConfig(movie) {
   const quotedTitle = `«${movie.title}»`;
+  const media = resolveMediaCopy(movie.media_type);
 
   return {
-    title: `Скачать фильм ${quotedTitle} — через Telegram-бота | Докопатыч`,
+    title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
     url: `${BASE_URL}/${moviePagePath(movie.id)}`,
-    h1: `Скачать фильм ${quotedTitle}`,
-    h2: `Страница запроса: скачать фильм ${quotedTitle}`,
-    description: `Низкочастотный запрос: скачать фильм ${quotedTitle}. Прямой переход в Telegram-бота к поиску конкретного фильма по ID ${movie.id}.`,
-    queryExample: `скачать фильм ${movie.title}`,
-    about: `Это страница под точечный запрос «скачать фильм ${movie.title}». По кнопке выше открывается готовый поиск фильма в Telegram-боте.`,
-    queries: `Подходят запросы: скачать фильм ${movie.title}, ${movie.title} торрент, ${movie.title} фильм скачать, ${movie.title} Telegram.`,
-    flow: 'Страница ведёт в Telegram-бота, где заранее подставлен ID фильма. Это сокращает путь от запроса до релевантной выдачи.',
+    h1: `Скачать ${media.nounAccusative} ${quotedTitle}`,
+    h2: `Страница запроса: скачать ${media.nounAccusative} ${quotedTitle}`,
+    description: `Низкочастотный запрос: скачать ${media.nounAccusative} ${quotedTitle}. Прямой переход в Telegram-бота к поиску конкретного ${media.nounGenitive} по ID ${movie.id}.`,
+    queryExample: `скачать ${media.nounAccusative} ${movie.title}`,
+    about: `Это страница под точечный запрос «скачать ${media.nounAccusative} ${movie.title}». По кнопке выше открывается готовый поиск ${media.nounGenitive} в Telegram-боте.`,
+    queries: `Подходят запросы: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} торрент, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
+    flow: `Страница ведёт в Telegram-бота, где заранее подставлен ID ${media.nounGenitive}. Это сокращает путь от запроса до релевантной выдачи.`,
+    popularTitle: `Популярные ${media.headingPlural} недели`,
+    applicationName: media.applicationName,
   };
 }
 
 function buildMoviePageHtml(movie) {
   const config = buildIntentConfig(movie);
-  const safeTitle = escapeHtml(movie.title);
   const configJson = JSON.stringify(config);
 
   return `<!doctype html>
@@ -65,7 +95,7 @@ function buildMoviePageHtml(movie) {
     <script src="analytics.js"></script>
     <title>${escapeHtml(config.title)}</title>
     <meta name="description" content="${escapeHtml(config.description)}" />
-    <meta name="application-name" content="Докопатыч | Поиск фильмов" />
+    <meta name="application-name" content="${escapeHtml(config.applicationName)}" />
     <meta property="og:title" content="${escapeHtml(config.title)}" />
     <meta property="og:site_name" content="Докопатыч" />
     <meta property="og:description" content="${escapeHtml(config.description)}" />
@@ -85,14 +115,14 @@ function buildMoviePageHtml(movie) {
             <img src="./images/round-sm.webp" alt="Аватар" class="avatar" />
             <span class="name">Докопатыч</span>
             <span class="username">@getTorrentFileBot</span>
-            <h1 class="description" data-h1>Скачать фильм ${safeTitle}</h1>
+            <h1 class="description" data-h1>${escapeHtml(config.h1)}</h1>
             <div class="btns-container">
-                <a href="${movieDeepLink(movie.id)}" class="start-btn" target="_blank" rel="noopener">ОТКРЫТЬ В TELEGRAM</a>
+                <a href="${movieDeepLink(movie)}" class="start-btn" target="_blank" rel="noopener">ОТКРЫТЬ В TELEGRAM</a>
             </div>
         </div>
         <div class="faq" data-faq></div>
         <div class="faq">
-            <div class="faqCard"><h3>Популярные фильмы недели</h3><ul data-popular-movies></ul></div>
+            <div class="faqCard"><h3>${escapeHtml(config.popularTitle)}</h3><ul data-popular-movies></ul></div>
         </div>
     </div>
     <script src="movies.js"></script>
@@ -111,8 +141,12 @@ function buildMoviePageHtml(movie) {
 `;
 }
 
+function flattenPopularMovies(source) {
+  return source.flat(Infinity).filter((item) => item && typeof item === 'object' && item.id && item.title);
+}
+
 function writeMoviePages() {
-  popularMovies.forEach((movie) => {
+  flattenPopularMovies(popularMovies).forEach((movie) => {
     const filePath = path.join(ROOT, moviePagePath(movie.id));
     fs.writeFileSync(filePath, buildMoviePageHtml(movie));
   });
@@ -123,7 +157,7 @@ function buildSitemapEntry({ loc, changefreq, priority }) {
 }
 
 function writeSitemap() {
-  const moviePages = popularMovies.map((movie) => ({
+  const moviePages = flattenPopularMovies(popularMovies).map((movie) => ({
     loc: `${BASE_URL}/${moviePagePath(movie.id)}`,
     changefreq: 'weekly',
     priority: '0.7',
@@ -134,7 +168,8 @@ function writeSitemap() {
   fs.writeFileSync(SITEMAP_PATH, sitemap);
 }
 
+const flatPopularMovies = flattenPopularMovies(popularMovies);
 writeMoviePages();
 writeSitemap();
 
-console.log(`Generated ${popularMovies.length} movie SEO pages and refreshed sitemap.`);
+console.log(`Generated ${flatPopularMovies.length} SEO pages and refreshed sitemap.`);

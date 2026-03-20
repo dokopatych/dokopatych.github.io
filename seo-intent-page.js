@@ -65,8 +65,12 @@ function renderJsonLd(config) {
   if (el) el.textContent = JSON.stringify(jsonLd);
 }
 
-function buildMovieDeepLink(movieId) {
-  return `${TELEGRAM_MOVIE_SEARCH_PREFIX}${movieId}-movie-lnd`;
+function resolveMediaType(mediaType) {
+  return mediaType === 'tv' ? 'tv' : 'movie';
+}
+
+function buildMovieDeepLink(movie) {
+  return `${TELEGRAM_MOVIE_SEARCH_PREFIX}${movie.id}-${resolveMediaType(movie.media_type)}-lnd`;
 }
 
 function buildMovieIntentLink(movieId) {
@@ -78,7 +82,7 @@ function resolveMovieLink(movie, config = {}) {
     return buildMovieIntentLink(movie.id);
   }
 
-  return buildMovieDeepLink(movie.id);
+  return buildMovieDeepLink(movie);
 }
 
 function renderPopularMovies(config = {}) {
