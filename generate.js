@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { popularMovies } = require('./movies.js');
+const { movieQueries, tvQueries } = require('./keys.js');
 
 const ROOT = __dirname;
 const BASE_URL = 'https://dokopatych.github.io';
@@ -38,6 +39,27 @@ const MEDIA_COPY = {
   },
 };
 
+const QUERY_STOP_WORDS = new Set([
+  'скачать',
+  'торрент',
+  'бесплатно',
+  'хорошем',
+  'качестве',
+  'через',
+  'фильм',
+  'фильмы',
+  'сериал',
+  'сериалы',
+  'русские',
+  'российские',
+  'новые',
+  'лучшие',
+  'сезон',
+  'серии',
+  'год',
+  'года',
+]);
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -64,9 +86,43 @@ function movieDeepLink(movie) {
   return `https://t.me/getTorrentFileBot?start=searchTr-${movie.id}-${media.telegramType}-lnd`;
 }
 
-function buildIntentConfig(movie) {
+function tokenize(value) {
+  return String(value)
+    .toLowerCase()
+    .split(/[^a-zа-я0-9]+/i)
+    .filter((token) => token.length >= 3 && !QUERY_STOP_WORDS.has(token));
+}
+
+function pickTagCloudQueries(movie, limit = 20) {
+  const source = resolveMediaType(movie.media_type) === 'tv' ? tvQueries : movieQueries;
+  const titleTokens = tokenize(movie.title);
+
+  if (!titleTokens.length) {
+    return source.slice(0, limit);
+  }
+
+  const scored = source
+    .map((query) => {
+      const lowerQuery = query.toLowerCase();
+      const score = titleTokens.reduce((acc, token) => acc + (lowerQuery.includes(token) ? 1 : 0), 0);
+      return { query, score };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || a.query.length - b.query.length)
+    .map((item) => item.query);
+
+  if (scored.length >= limit) {
+    return scored.slice(0, limit);
+  }
+
+  const merged = [...scored, ...source];
+  return [...new Set(merged)].slice(0, limit);
+}
+
+function buildIntentConfig(movie, tagCloudQueries) {
   const quotedTitle = `«${movie.title}»`;
   const media = resolveMediaCopy(movie.media_type);
+  const queryHighlights = tagCloudQueries.slice(0, 6);
 
   return {
     title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
@@ -76,15 +132,19 @@ function buildIntentConfig(movie) {
     description: `Низкочастотный запрос: скачать ${media.nounAccusative} ${quotedTitle}. Прямой переход в Telegram-бота к поиску конкретного ${media.nounGenitive} по ID ${movie.id}.`,
     queryExample: `скачать ${media.nounAccusative} ${movie.title}`,
     about: `Это страница под точечный запрос «скачать ${media.nounAccusative} ${movie.title}». По кнопке выше открывается готовый поиск ${media.nounGenitive} в Telegram-боте.`,
-    queries: `Подходят запросы: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} торрент, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
+    queries: queryHighlights.length
+      ? `Подходят запросы: ${queryHighlights.join(', ')}.`
+      : `Подходят запросы: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} торрент, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
     flow: `Страница ведёт в Telegram-бота, где заранее подставлен ID ${media.nounGenitive}. Это сокращает путь от запроса до релевантной выдачи.`,
     popularTitle: `Популярные ${media.headingPlural} недели`,
     applicationName: media.applicationName,
+    tagCloudTitle: 'С какими запросами обычно приходят к боту',
+    tagCloudQueries,
   };
 }
 
 function buildMoviePageHtml(movie) {
-  const config = buildIntentConfig(movie);
+  const config = buildIntentConfig(movie, pickTagCloudQueries(movie));
   const configJson = JSON.stringify(config);
 
   return `<!doctype html>

@@ -4000,3 +4000,8 @@ vr фильмы скачать торрент
 скачать фильм другие через торрент
 скачать торрент фильма золотое дно
 скачать фильмы школа торрент`
+
+module.exports = {
+  tvQueries: keys1.split('\n').map((q) => q.trim()).filter(Boolean),
+  movieQueries: keys2.split('\n').map((q) => q.trim()).filter(Boolean),
+};

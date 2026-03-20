@@ -228,3 +228,22 @@ h3 {
     margin: 0;
     padding-left: 20px;
 }
+
+.neon-tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.neon-tag {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    line-height: 1.25;
+    border: 1px solid rgba(116, 150, 255, 0.85);
+    background: linear-gradient(45deg, rgba(44, 71, 214, 0.35), rgba(236, 100, 42, 0.28));
+    box-shadow:
+        0 0 10px rgba(44, 71, 214, 0.45),
+        0 0 14px rgba(236, 100, 42, 0.35);
+}

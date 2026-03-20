@@ -9,6 +9,15 @@ const COMMON_NAV_LINKS = [
 
 const TELEGRAM_MOVIE_SEARCH_PREFIX = 'https://t.me/getTorrentFileBot?start=searchTr-';
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 function fillMeta(config) {
   document.title = config.title;
   const set = (selector, attr, value) => {
@@ -27,13 +36,21 @@ function renderFaq(config) {
   const faq = document.querySelector('[data-faq]');
   if (!faq) return;
 
+  const cloudItems = Array.isArray(config.tagCloudQueries) ? config.tagCloudQueries : [];
+  const cloudCard = cloudItems.length
+    ? `<div class="faqCard"><h3>${escapeHtml(config.tagCloudTitle || 'Облако запросов')}</h3><div class="neon-tag-cloud">${cloudItems
+        .map((query) => `<span class="neon-tag">${escapeHtml(query)}</span>`)
+        .join('')}</div></div>`
+    : '';
+
   const cards = [
     `<div class="faqCard"><h2>${config.h2}</h2><p>${config.description}</p></div>`,
+    cloudCard,
     `<div class="faqCard"><h3>Что это за страница</h3><p>${config.about}</p></div>`,
     `<div class="faqCard"><h3>Какие запросы подходят</h3><p>${config.queries}</p></div>`,
     `<div class="faqCard"><h3>Как работает бот</h3><p>${config.flow}</p></div>`,
     `<div class="faqCard"><h3>Навигация</h3><ul>${COMMON_NAV_LINKS.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join('')}</ul></div>`,
-  ];
+  ].filter(Boolean);
 
   faq.innerHTML = cards.join('');
 }
