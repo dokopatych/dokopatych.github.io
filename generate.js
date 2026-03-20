@@ -123,15 +123,16 @@ function buildIntentConfig(movie, tagCloudQueries) {
   const quotedTitle = `«${movie.title}»`;
   const media = resolveMediaCopy(movie.media_type);
   const queryHighlights = tagCloudQueries.slice(0, 6);
+  const link = movieDeepLink(movie)
 
   return {
     title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
     url: `${BASE_URL}/${moviePagePath(movie.id)}`,
     h1: `Скачать ${media.nounAccusative} ${quotedTitle}`,
     h2: `Страница запроса: скачать ${media.nounAccusative} ${quotedTitle}`,
-    description: `Низкочастотный запрос: скачать ${media.nounAccusative} ${quotedTitle}. Прямой переход в Telegram-бота к поиску конкретного ${media.nounGenitive} по ID ${movie.id}.`,
+    description: `Если вы хотите скачать ${media.nounAccusative} ${quotedTitle}, то здесь есть прямой переход в Telegram-бота к поиску конкретного ${media.nounGenitive}: ${link}.`,
     queryExample: `скачать ${media.nounAccusative} ${movie.title}`,
-    about: `Это страница под точечный запрос «скачать ${media.nounAccusative} ${movie.title}». По кнопке выше открывается готовый поиск ${media.nounGenitive} в Telegram-боте.`,
+    about: `Это страница под точечный запрос «скачать ${media.nounAccusative} ${movie.title}». По кнопке выше открывается готовый поиск ${media.nounGenitive} в Telegram-боте. Прямой вход: ${link}`,
     queries: queryHighlights.length
       ? `Подходят запросы: ${queryHighlights.join(', ')}.`
       : `Подходят запросы: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} торрент, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
