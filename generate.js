@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { popularMovies } = require('./movies.js');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = __dirname;
 const BASE_URL = 'https://dokopatych.github.io';
 const TODAY = new Date().toISOString().slice(0, 10);
 const SITEMAP_PATH = path.join(ROOT, 'sitemap.xml');
