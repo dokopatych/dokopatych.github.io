@@ -1,0 +1,9 @@
+{
+	"name": "dkptch", 
+	"version": "1.0.0",
+	"scripts": {
+			"build": "node generate.js"
+	},
+	"author": "mb",
+	"description": "Докопатыч"
+}
