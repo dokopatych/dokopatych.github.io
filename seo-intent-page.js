@@ -1,10 +1,10 @@
 const COMMON_NAV_LINKS = [
   { href: '/', label: 'Главная страница' },
-  { href: '/music-search-bot.html', label: 'Поиск музыки' },
-  { href: '/audiobook-search-bot.html', label: 'Поиск аудиокниг' },
-  { href: '/film-download-bot.html', label: 'Поиск фильмов и сериалов' },
-  { href: '/game-search-bot.html', label: 'Поиск игр и программ' },
-  { href: '/file-search-bot.html', label: 'Поиск файлов и медиа' },
+  { href: '/pages/music-search-bot.html', label: 'Поиск музыки' },
+  { href: '/pages/audiobook-search-bot.html', label: 'Поиск аудиокниг' },
+  { href: '/pages/film-download-bot.html', label: 'Поиск фильмов и сериалов' },
+  { href: '/pages/game-search-bot.html', label: 'Поиск игр и программ' },
+  { href: '/pages/file-search-bot.html', label: 'Поиск файлов и медиа' },
 ];
 
 const TELEGRAM_MOVIE_SEARCH_PREFIX = 'https://t.me/getTorrentFileBot?start=searchTr-';
@@ -45,11 +45,11 @@ function renderFaq(config) {
 
   const cards = [
     `<div class="faqCard"><h2>${config.h2}</h2><p>${config.description}</p></div>`,
-    cloudCard,
-    `<div class="faqCard"><h3>Что это за страница</h3><p>${config.about}</p></div>`,
-    `<div class="faqCard"><h3>Какие запросы подходят</h3><p>${config.queries}</p></div>`,
+    `<div class="faqCard"><h3>Как скачать</h3><p>${config.about}</p></div>`,
     `<div class="faqCard"><h3>Как работает бот</h3><p>${config.flow}</p></div>`,
     `<div class="faqCard"><h3>Навигация</h3><ul>${COMMON_NAV_LINKS.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join('')}</ul></div>`,
+    `<div class="faqCard"><h3>Какие запросы подходят</h3><p>${config.queries}</p></div>`,
+    cloudCard,
   ].filter(Boolean);
 
   faq.innerHTML = cards.join('');
@@ -91,7 +91,7 @@ function buildMovieDeepLink(movie) {
 }
 
 function buildMovieIntentLink(movieId) {
-  return `/skachat-film-${movieId}.html`;
+  return `/pages/skachat-film-${movieId}.html`;
 }
 
 function resolveMovieLink(movie, config = {}) {
