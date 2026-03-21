@@ -7,7 +7,7 @@ const COMMON_NAV_LINKS = [
   { href: '/pages/file-search-bot.html', label: 'Поиск файлов и медиа' },
 ];
 
-const TELEGRAM_MOVIE_SEARCH_PREFIX = 'https://t.me/getTorrentFileBot?start=searchTr-';
+const TELEGRAM_MOVIE_SEARCH_PREFIX = 'https://t.me/DokopatychBot?start=searchTr-';
 
 function escapeHtml(value) {
   return String(value)

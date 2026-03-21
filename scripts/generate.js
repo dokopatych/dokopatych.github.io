@@ -84,7 +84,7 @@ function resolveMediaCopy(mediaType) {
 
 function movieDeepLink(movie) {
   const media = resolveMediaCopy(movie.media_type);
-  return `https://t.me/getTorrentFileBot?start=searchTr-${movie.id}-${media.telegramType}-lnd`;
+  return `https://t.me/DokopatychBot?start=searchTr-${movie.id}-${media.telegramType}-lnd`;
 }
 
 function tokenize(value) {
@@ -177,7 +177,7 @@ function buildMoviePageHtml(movie) {
         <div class="botCard">
             <img src="../images/round-sm.webp" alt="Аватар" class="avatar" />
             <span class="name">Докопатыч</span>
-            <span class="username">@getTorrentFileBot</span>
+            <span class="username">@DokopatychBot</span>
             <h1 class="description" data-h1>${escapeHtml(config.h1)}</h1>
             <div class="btns-container">
                 <a href="${movieDeepLink(movie)}" class="start-btn" target="_blank" rel="noopener">ОТКРЫТЬ В TELEGRAM</a>
