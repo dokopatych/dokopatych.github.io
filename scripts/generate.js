@@ -259,7 +259,7 @@ function writeLinksList() {
   const pageUrls = readAllHtmlPages();
   const allUrls = [`${BASE_URL}/`, ...pageUrls];
   const dedupedUrls = [...new Set(allUrls)];
-  fs.writeFileSync(LINKS_LIST_PATH, `${dedupedUrls.join('\n\n')}\n`);
+  fs.writeFileSync(LINKS_LIST_PATH, `${dedupedUrls.join('\n')}`);
 }
 
 const flatPopularMovies = flattenPopularMovies(popularMovies);
