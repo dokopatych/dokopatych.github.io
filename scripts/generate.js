@@ -90,6 +90,12 @@ function movieDeepLink(movie) {
   return `https://t.me/DokopatychBot?start=searchTr-${movie.id}-${media.telegramType}-lnd`;
 }
 
+function movieDesktopDeepLink(movie) {
+	const webLink = movieDeepLink(movie);
+	const payload = webLink.split('?start=')[1] || '';
+	return `tg://resolve?domain=DokopatychBot${payload ? `&start=${payload}` : ''}`;
+}
+
 function tokenize(value) {
   return String(value)
     .toLowerCase()
@@ -183,7 +189,8 @@ function buildMoviePageHtml(movie) {
             <span class="username">@DokopatychBot</span>
             <h1 class="description" data-h1>${escapeHtml(config.h1)}</h1>
             <div class="btns-container">
-                <a href="${movieDeepLink(movie)}" class="start-btn" target="_blank" rel="noopener">ОТКРЫТЬ В TELEGRAM</a>
+                <a href="${movieDeepLink(movie)}" class="start-btn" target="_blank" rel="noopener">WEB</a>
+                <a href="${movieDesktopDeepLink(movie)}" class="start-btn">DESKTOP</a>
             </div>
         </div>
         <div class="faq" data-faq></div>
@@ -200,6 +207,20 @@ function buildMoviePageHtml(movie) {
             linkType: 'intent',
             emptyText: 'Список скоро обновится.',
         };
+        (function() {
+          var isMobile = /iphone|ipad|ipod|android|blackberry|opera mini|iemobile|mobile/i.test((navigator.userAgent||'').toLowerCase()) || (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+          if (!isMobile) return;
+          var btns = document.querySelector('.btns-container');
+          if (!btns) return;
+          btns.innerHTML = '';
+          var a = document.createElement('a');
+          a.className = 'start-btn';
+          a.href = ${JSON.stringify(movieDeepLink(movie))};
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = 'ОТКРЫТЬ В TELEGRAM';
+          btns.appendChild(a);
+        })();
     </script>
     <script src="../seo-intent-page.js"></script>
 </body>
