@@ -8,6 +8,8 @@ const ROOT = path.resolve(__dirname, '..');
 const BASE_URL = 'https://dokopatych.github.io';
 const TODAY = new Date().toISOString().slice(0, 10);
 const SITEMAP_PATH = path.join(ROOT, 'sitemap.xml');
+const LINKS_LIST_PATH = path.join(ROOT, 'all-links.txt');
+const PAGES_DIR = path.join(ROOT, 'pages');
 
 const SEO_BASE_PAGES = [
   { loc: `${BASE_URL}/`, changefreq: 'daily', priority: '1.0' },
@@ -20,6 +22,7 @@ const SEO_BASE_PAGES = [
   { loc: `${BASE_URL}/pages/skachat-audioknigu-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
   { loc: `${BASE_URL}/pages/skachat-serial-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
 ];
+const SEO_BASE_PAGES_BY_LOC = new Map(SEO_BASE_PAGES.map((page) => [page.loc, page]));
 
 const MEDIA_COPY = {
   movie: {
@@ -215,25 +218,54 @@ function writeMoviePages() {
   });
 }
 
+function readAllHtmlPages() {
+  if (!fs.existsSync(PAGES_DIR)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(PAGES_DIR)
+    .filter((fileName) => fileName.endsWith('.html'))
+    .map((fileName) => `${BASE_URL}/pages/${fileName}`);
+}
+
 function buildSitemapEntry({ loc, changefreq, priority }) {
   return `  <url><loc>${loc}</loc><lastmod>${TODAY}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
 }
 
 function writeSitemap() {
-  const moviePages = flattenPopularMovies(popularMovies).map((movie) => ({
-    loc: `${BASE_URL}/${moviePagePath(movie.id)}`,
-    changefreq: 'weekly',
-    priority: '0.7',
-  }));
+  const pageUrls = readAllHtmlPages();
+  const autoPages = pageUrls.map((loc) => {
+    const knownPage = SEO_BASE_PAGES_BY_LOC.get(loc);
+    if (knownPage) {
+      return knownPage;
+    }
 
-  const entries = [...SEO_BASE_PAGES, ...moviePages].map(buildSitemapEntry).join('\n');
+    return {
+      loc,
+      changefreq: 'weekly',
+      priority: '0.7',
+    };
+  });
+
+  const pages = [SEO_BASE_PAGES[0], ...autoPages];
+  const dedupedPages = [...new Map(pages.map((page) => [page.loc, page])).values()];
+  const entries = dedupedPages.map(buildSitemapEntry).join('\n');
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
   fs.writeFileSync(SITEMAP_PATH, sitemap);
+}
+
+function writeLinksList() {
+  const pageUrls = readAllHtmlPages();
+  const allUrls = [`${BASE_URL}/`, ...pageUrls];
+  const dedupedUrls = [...new Set(allUrls)];
+  fs.writeFileSync(LINKS_LIST_PATH, `${dedupedUrls.join('\n\n')}\n`);
 }
 
 const flatPopularMovies = flattenPopularMovies(popularMovies);
 writeMoviePages();
 writeSitemap();
+writeLinksList();
 
-console.log(`Generated ${flatPopularMovies.length} SEO pages and refreshed sitemap.`);
+console.log(`Generated ${flatPopularMovies.length} SEO pages, refreshed sitemap, and wrote links list.`);
 
