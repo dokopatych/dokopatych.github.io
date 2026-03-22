@@ -29,7 +29,8 @@
             <span class="username">@DokopatychBot</span>
             <h1 class="description" data-h1>Скачать сериал «Новичок»</h1>
             <div class="btns-container">
-                <a href="https://t.me/DokopatychBot?start=searchTr-79744-tv-lnd" class="start-btn" target="_blank" rel="noopener">ОТКРЫТЬ В TELEGRAM</a>
+                <a href="https://t.me/DokopatychBot?start=searchTr-79744-tv-lnd" class="start-btn" target="_blank" rel="noopener">WEB</a>
+                <a href="tg://resolve?domain=DokopatychBot&start=searchTr-79744-tv-lnd" class="start-btn">DESKTOP</a>
             </div>
         </div>
         <div class="faq" data-faq></div>
@@ -46,6 +47,20 @@
             linkType: 'intent',
             emptyText: 'Список скоро обновится.',
         };
+        (function() {
+          var isMobile = /iphone|ipad|ipod|android|blackberry|opera mini|iemobile|mobile/i.test((navigator.userAgent||'').toLowerCase()) || (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+          if (!isMobile) return;
+          var btns = document.querySelector('.btns-container');
+          if (!btns) return;
+          btns.innerHTML = '';
+          var a = document.createElement('a');
+          a.className = 'start-btn';
+          a.href = "https://t.me/DokopatychBot?start=searchTr-79744-tv-lnd";
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = 'ОТКРЫТЬ В TELEGRAM';
+          btns.appendChild(a);
+        })();
     </script>
     <script src="../seo-intent-page.js"></script>
 </body>
