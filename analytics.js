@@ -1,3 +1,15 @@
+(function redirectLegacyGithubPagesHost() {
+  const LEGACY_HOSTS = new Set(['dokopatych.github.io', 'www.dokopatych.github.io']);
+  const VERCEL_HOST = 'dokopatych.vercel.app';
+
+  if (!LEGACY_HOSTS.has(window.location.hostname)) {
+    return;
+  }
+
+  const targetUrl = `https://${VERCEL_HOST}${window.location.pathname}${window.location.search}${window.location.hash}`;
+  window.location.replace(targetUrl);
+})();
+
 (function initAnalytics() {
   const GA_ID = 'G-YZ78JBVPPD';
   const YM_ID = 103218568;
