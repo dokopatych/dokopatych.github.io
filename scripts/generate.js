@@ -1,138 +1,144 @@
-const fs = require('fs');
-const path = require('path');
-const { popularMovies } = require('../movies.js');
-const { movieQueries, tvQueries } = require('../keys.js');
+const fs = require("fs")
+const path = require("path")
+const { popularMovies } = require("../movies.js")
+const { movieQueries, tvQueries } = require("../keys.js")
 
 // Point ROOT to the project root (one level up from this scripts/ directory)
-const ROOT = path.resolve(__dirname, '..');
-const BASE_URL = 'https://dokopatych.github.io';
-const TODAY = new Date().toISOString().slice(0, 10);
-const SITEMAP_PATH = path.join(ROOT, 'sitemap.xml');
-const LINKS_LIST_PATH = path.join(ROOT, 'all-links.txt');
-const PAGES_DIR = path.join(ROOT, 'pages');
+const ROOT = path.resolve(__dirname, "..")
+const BASE_URL = "https://dokopatych.github.io"
+const TODAY = new Date().toISOString().slice(0, 10)
+const SITEMAP_PATH = path.join(ROOT, "sitemap.xml")
+const LINKS_LIST_PATH = path.join(ROOT, "all-links.txt")
+const PAGES_DIR = path.join(ROOT, "pages")
 
 const SEO_BASE_PAGES = [
-  { loc: `${BASE_URL}/`, changefreq: 'daily', priority: '1.0' },
-  { loc: `${BASE_URL}/pages/music-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  { loc: `${BASE_URL}/pages/audiobook-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  { loc: `${BASE_URL}/pages/film-download-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  { loc: `${BASE_URL}/pages/game-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  { loc: `${BASE_URL}/pages/file-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  { loc: `${BASE_URL}/pages/skachat-albom-artista.html`, changefreq: 'weekly', priority: '0.8' },
-  { loc: `${BASE_URL}/pages/skachat-audioknigu-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
-  { loc: `${BASE_URL}/pages/skachat-serial-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
-];
-const SEO_BASE_PAGES_BY_LOC = new Map(SEO_BASE_PAGES.map((page) => [page.loc, page]));
+  { loc: `${BASE_URL}/`, changefreq: "daily", priority: "1.0" },
+  // { loc: `${BASE_URL}/pages/music-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/audiobook-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/film-download-bot.html`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/game-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/file-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/skachat-albom-artista.html`, changefreq: 'weekly', priority: '0.8' },
+  // { loc: `${BASE_URL}/pages/skachat-audioknigu-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
+  // { loc: `${BASE_URL}/pages/skachat-serial-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
+]
+const SEO_BASE_PAGES_BY_LOC = new Map(
+  SEO_BASE_PAGES.map((page) => [page.loc, page]),
+)
 
 const MEDIA_COPY = {
   movie: {
-    nounAccusative: 'фильм',
-    nounGenitive: 'фильма',
-    nounPlural: 'фильмы',
-    headingPlural: 'фильмы',
-    applicationName: 'Докопатыч | Поиск фильмов',
-    telegramType: 'movie',
+    nounAccusative: "фильм",
+    nounGenitive: "фильма",
+    nounPlural: "фильмы",
+    headingPlural: "фильмы",
+    applicationName: "Докопатыч | Поиск фильмов",
+    telegramType: "movie",
   },
   tv: {
-    nounAccusative: 'сериал',
-    nounGenitive: 'сериала',
-    nounPlural: 'сериалы',
-    headingPlural: 'сериалы',
-    applicationName: 'Докопатыч | Поиск сериалов',
-    telegramType: 'tv',
+    nounAccusative: "сериал",
+    nounGenitive: "сериала",
+    nounPlural: "сериалы",
+    headingPlural: "сериалы",
+    applicationName: "Докопатыч | Поиск сериалов",
+    telegramType: "tv",
   },
-};
+}
 
 const QUERY_STOP_WORDS = new Set([
-  'скачать',
-  'торрент',
-  'бесплатно',
-  'хорошем',
-  'качестве',
-  'через',
-  'фильм',
-  'фильмы',
-  'сериал',
-  'сериалы',
-  'русские',
-  'российские',
-  'новые',
-  'лучшие',
-  'сезон',
-  'серии',
-  'год',
-  'года',
-]);
+  "скачать",
+  "торрент",
+  "бесплатно",
+  "хорошем",
+  "качестве",
+  "через",
+  "фильм",
+  "фильмы",
+  "сериал",
+  "сериалы",
+  "русские",
+  "российские",
+  "новые",
+  "лучшие",
+  "сезон",
+  "серии",
+  "год",
+  "года",
+])
 
 function escapeHtml(value) {
   return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
 }
 
 function moviePagePath(movieId) {
-  return `pages/skachat-film-${movieId}.html`;
+  return `/pages/about-movie/${movieId}.html`
 }
 
 function resolveMediaType(mediaType) {
-  return mediaType === 'tv' ? 'tv' : 'movie';
+  return mediaType === "tv" ? "tv" : "movie"
 }
 
 function resolveMediaCopy(mediaType) {
-  return MEDIA_COPY[resolveMediaType(mediaType)];
+  return MEDIA_COPY[resolveMediaType(mediaType)]
 }
 
 function movieDeepLink(movie) {
-  const media = resolveMediaCopy(movie.media_type);
-  return `https://t.me/DokopatychBot?start=searchTr-${movie.id}-${media.telegramType}-lnd`;
+  const media = resolveMediaCopy(movie.media_type)
+  return `https://t.me/DokopatychBot?start=searchTr-${movie.id}-${media.telegramType}-lnd`
 }
 
 function movieDesktopDeepLink(movie) {
-	const webLink = movieDeepLink(movie);
-	const payload = webLink.split('?start=')[1] || '';
-	return `tg://resolve?domain=DokopatychBot${payload ? `&start=${payload}` : ''}`;
+  const webLink = movieDeepLink(movie)
+  const payload = webLink.split("?start=")[1] || ""
+  return `tg://resolve?domain=DokopatychBot${payload ? `&start=${payload}` : ""}`
 }
 
 function tokenize(value) {
   return String(value)
     .toLowerCase()
     .split(/[^a-zа-я0-9]+/i)
-    .filter((token) => token.length >= 3 && !QUERY_STOP_WORDS.has(token));
+    .filter((token) => token.length >= 3 && !QUERY_STOP_WORDS.has(token))
 }
 
 function pickTagCloudQueries(movie, limit = 20) {
-  const source = resolveMediaType(movie.media_type) === 'tv' ? tvQueries : movieQueries;
-  const titleTokens = tokenize(movie.title);
+  const source =
+    resolveMediaType(movie.media_type) === "tv" ? tvQueries : movieQueries
+  const titleTokens = tokenize(movie.title)
 
   if (!titleTokens.length) {
-    return source.slice(0, limit);
+    return source.slice(0, limit)
   }
 
   const scored = source
     .map((query) => {
-      const lowerQuery = query.toLowerCase();
-      const score = titleTokens.reduce((acc, token) => acc + (lowerQuery.includes(token) ? 1 : 0), 0);
-      return { query, score };
+      const lowerQuery = query.toLowerCase()
+      const score = titleTokens.reduce(
+        (acc, token) => acc + (lowerQuery.includes(token) ? 1 : 0),
+        0,
+      )
+      return { query, score }
     })
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score || a.query.length - b.query.length)
-    .map((item) => item.query);
+    .map((item) => item.query)
 
   if (scored.length >= limit) {
-    return scored.slice(0, limit);
+    return scored.slice(0, limit)
   }
 
-  const merged = [...scored, ...source];
-  return [...new Set(merged)].slice(0, limit);
+  const merged = [...scored, ...source]
+  return [...new Set(merged)].slice(0, limit)
 }
 
 function buildIntentConfig(movie, tagCloudQueries) {
-  const quotedTitle = `«${movie.title}»`;
-  const media = resolveMediaCopy(movie.media_type);
-  const queryHighlights = tagCloudQueries.slice(0, 6);
+  const quotedTitle = `«${movie.title}»`
+  const media = resolveMediaCopy(movie.media_type)
+  const queryHighlights = tagCloudQueries.slice(0, 6)
   const link = movieDeepLink(movie)
 
   return {
@@ -144,19 +150,19 @@ function buildIntentConfig(movie, tagCloudQueries) {
     queryExample: `скачать ${media.nounAccusative} ${movie.title}`,
     about: `<a href="${link}">Скачать ${media.nounAccusative} ${quotedTitle}</a> нужно через Telegram-бота, он выдаст торрент файл`,
     queries: queryHighlights.length
-      ? `Подходят запросы: ${queryHighlights.join(', ')}.`
+      ? `Подходят запросы: ${queryHighlights.join(", ")}.`
       : `Подходят запросы: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} торрент, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
     flow: `Страница ведёт в Telegram-бота, где заранее подставлен ID ${media.nounGenitive}. Это сокращает путь от запроса до релевантной выдачи.`,
     popularTitle: `Популярные ${media.headingPlural} недели`,
     applicationName: media.applicationName,
-    tagCloudTitle: 'С какими запросами обычно приходят к боту',
+    tagCloudTitle: "С какими запросами обычно приходят к боту",
     tagCloudQueries,
-  };
+  }
 }
 
 function buildMoviePageHtml(movie) {
-  const config = buildIntentConfig(movie, pickTagCloudQueries(movie));
-  const configJson = JSON.stringify(config);
+  const config = buildIntentConfig(movie, pickTagCloudQueries(movie))
+  const configJson = JSON.stringify(config)
 
   return `<!doctype html>
 <html lang="ru">
@@ -225,68 +231,73 @@ function buildMoviePageHtml(movie) {
     <script src="../seo-intent-page.js"></script>
 </body>
 </html>
-`;
+`
 }
 
 function flattenPopularMovies(source) {
-  return source.flat(Infinity).filter((item) => item && typeof item === 'object' && item.id && item.title);
+  return source
+    .flat(Infinity)
+    .filter((item) => item && typeof item === "object" && item.id && item.title)
 }
 
 function writeMoviePages() {
   flattenPopularMovies(popularMovies).forEach((movie) => {
-    const filePath = path.join(ROOT, moviePagePath(movie.id));
-    fs.writeFileSync(filePath, buildMoviePageHtml(movie));
-  });
+    const filePath = path.join(ROOT, moviePagePath(movie.id))
+    fs.writeFileSync(filePath, buildMoviePageHtml(movie))
+  })
 }
 
 function readAllHtmlPages() {
   if (!fs.existsSync(PAGES_DIR)) {
-    return [];
+    return []
   }
 
   return fs
     .readdirSync(PAGES_DIR)
-    .filter((fileName) => fileName.endsWith('.html'))
-    .map((fileName) => `${BASE_URL}/pages/${fileName}`);
+    .filter((fileName) => fileName.endsWith(".html"))
+    .map((fileName) => `${BASE_URL}/pages/${fileName}`)
 }
 
 function buildSitemapEntry({ loc, changefreq, priority }) {
-  return `  <url><loc>${loc}</loc><lastmod>${TODAY}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
+  return `  <url><loc>${loc}</loc><lastmod>${TODAY}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
 }
 
 function writeSitemap() {
-  const pageUrls = readAllHtmlPages();
+  const pageUrls = readAllHtmlPages()
   const autoPages = pageUrls.map((loc) => {
-    const knownPage = SEO_BASE_PAGES_BY_LOC.get(loc);
+    const knownPage = SEO_BASE_PAGES_BY_LOC.get(loc)
     if (knownPage) {
-      return knownPage;
+      return knownPage
     }
 
     return {
       loc,
-      changefreq: 'weekly',
-      priority: '0.7',
-    };
-  });
+      changefreq: "weekly",
+      priority: "0.7",
+    }
+  })
 
-  const pages = [SEO_BASE_PAGES[0], ...autoPages];
-  const dedupedPages = [...new Map(pages.map((page) => [page.loc, page])).values()];
-  const entries = dedupedPages.map(buildSitemapEntry).join('\n');
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
-  fs.writeFileSync(SITEMAP_PATH, sitemap);
+  const pages = [SEO_BASE_PAGES[0], ...autoPages]
+  const dedupedPages = [
+    ...new Map(pages.map((page) => [page.loc, page])).values(),
+  ]
+  const entries = dedupedPages.map(buildSitemapEntry).join("\n")
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`
+  fs.writeFileSync(SITEMAP_PATH, sitemap)
 }
 
 function writeLinksList() {
-  const pageUrls = readAllHtmlPages();
-  const allUrls = [`${BASE_URL}/`, ...pageUrls];
-  const dedupedUrls = [...new Set(allUrls)];
-  fs.writeFileSync(LINKS_LIST_PATH, `${dedupedUrls.join('\n')}`);
+  const pageUrls = readAllHtmlPages()
+  const allUrls = [`${BASE_URL}/`, ...pageUrls]
+  const dedupedUrls = [...new Set(allUrls)]
+  fs.writeFileSync(LINKS_LIST_PATH, `${dedupedUrls.join("\n")}`)
 }
 
-const flatPopularMovies = flattenPopularMovies(popularMovies);
-writeMoviePages();
-writeSitemap();
-writeLinksList();
+const flatPopularMovies = flattenPopularMovies(popularMovies)
+writeMoviePages()
+writeSitemap()
+writeLinksList()
 
-console.log(`Generated ${flatPopularMovies.length} SEO pages, refreshed sitemap, and wrote links list.`);
-
+console.log(
+  `Generated ${flatPopularMovies.length} SEO pages, refreshed sitemap, and wrote links list.`,
+)
