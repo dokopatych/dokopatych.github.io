@@ -1,171 +1,248 @@
 <!doctype html>
 <html lang="ru">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="analytics.js"></script>
-    <meta name="yandex-verification" content="24980ce091a40523" />
+    <meta name="yandex-verification" content="6f8ed6b63a46c0af" />
 
     <title>Докопатыч — поиск фильмов, музыки, игр и файлов в Telegram</title>
-    <meta name="description"
-        content="Телеграм-бот для поиска музыки, аудиокниг, фильмов, сериалов, игр и других файлов. Для небольших файлов доступна загрузка в боте, для больших — торрент-файл." />
+    <meta
+      name="description"
+      content="Телеграм-бот для поиска музыки, аудиокниг, фильмов, сериалов, игр и других файлов. Для небольших файлов доступна загрузка в боте, для больших — торрент-файл."
+    />
 
-    <meta name="application-name" content="Докопатыч | Поиск музыки, фильмов, игр и файлов" />
-    <meta property="og:title" content="Докопатыч | Поиск музыки, фильмов, игр и файлов" />
-    <meta property="og:site_name" content="Докопатыч | Поиск музыки, фильмов, игр и файлов" />
+    <meta
+      name="application-name"
+      content="Докопатыч | Поиск музыки, фильмов, игр и файлов"
+    />
+    <meta
+      property="og:title"
+      content="Докопатыч | Поиск музыки, фильмов, игр и файлов"
+    />
+    <meta
+      property="og:site_name"
+      content="Докопатыч | Поиск музыки, фильмов, игр и файлов"
+    />
 
-    <meta property="og:description"
-        content="Телеграм-бот для поиска музыки, аудиокниг, фильмов, сериалов, игр и других файлов. Для небольших файлов доступна загрузка в боте, для больших — торрент-файл." />
+    <meta
+      property="og:description"
+      content="Телеграм-бот для поиска музыки, аудиокниг, фильмов, сериалов, игр и других файлов. Для небольших файлов доступна загрузка в боте, для больших — торрент-файл."
+    />
 
-    <meta property="og:image" content="https://dokopatych.vercel.app/images/square.webp" />
+    <meta
+      property="og:image"
+      content="https://dokopatych.vercel.app/images/square.webp"
+    />
     <meta property="og:url" content="https://dokopatych.vercel.app/" />
     <meta property="og:type" content="website" />
 
-    <link rel="canonical" href="https://dokopatych.vercel.app/">
+    <link rel="canonical" href="https://dokopatych.vercel.app/" />
 
-    <!-- Favicon --> 
-    <link rel="icon" href="https://dokopatych.vercel.app/images/round-sm.ico" type="image/x-icon"> 
-    <link rel="shortcut icon" href="https://dokopatych.vercel.app/images/round-sm.ico" />
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="https://dokopatych.vercel.app/images/round-sm.ico"
+      type="image/x-icon"
+    />
+    <link
+      rel="shortcut icon"
+      href="https://dokopatych.vercel.app/images/round-sm.ico"
+    />
 
     <!-- Стили -->
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
     <script type="application/ld+json">
-            {
-              "@context": "http://schema.org/",
-              "@type": "Service",
-              "name": "Поиск музыки, фильмов, игр и файлов в Telegram",
-              "provider": {
-                "@type": "Organization",
-                "name": "Dokopatych",
-                "url": "https://dokopatych.vercel.app/"
-              },
-              "audience": {
-                "@type": "Audience",
-                "audienceType": "Пользователи Telegram"
-              },
-              "serviceType": "Поиск контента и файлов",
-              "offers": {
-                "@type": "Offer",
-                "price": "Free",
-                "priceCurrency": "RUB"
-              }
-            }
-            </script>
-</head>
+      {
+        "@context": "http://schema.org/",
+        "@type": "Service",
+        "name": "Поиск музыки, фильмов, игр и файлов в Telegram",
+        "provider": {
+          "@type": "Organization",
+          "name": "Dokopatych",
+          "url": "https://dokopatych.vercel.app/"
+        },
+        "audience": {
+          "@type": "Audience",
+          "audienceType": "Пользователи Telegram"
+        },
+        "serviceType": "Поиск контента и файлов",
+        "offers": {
+          "@type": "Offer",
+          "price": "Free",
+          "priceCurrency": "RUB"
+        }
+      }
+    </script>
+  </head>
 
-<body>
+  <body>
     <div class="backGround"></div>
 
-    <div class='column'>
-        <div class="tooltip" id="tooltip">
-            <img src="./images/qr.webp" alt="QR-код для Telegram бота Докопатыч" />
-            <span class="qrText">@DOKOPATYCHBOT</span>
+    <div class="column">
+      <div class="tooltip" id="tooltip">
+        <img src="./images/qr.webp" alt="QR-код для Telegram бота Докопатыч" />
+        <span class="qrText">@DOKOPATYCHBOT</span>
+      </div>
+
+      <div class="botCard">
+        <img src="./images/round-sm.webp" alt="Аватар" class="avatar" />
+        <span class="name" id="botName">Докопатыч</span>
+        <span class="username">@DokopatychBot</span>
+        <h1 class="description" id="heroDescription">
+          Бот для быстрого поиска кино <br /><br />
+          In memory of Jeff Baena
+        </h1>
+        <div class="btns-container">
+          <a
+            href="https://t.me/DokopatychBot?start=landing"
+            class="start-btn"
+            target="_blank"
+          >
+            WEB
+          </a>
+          <a href="tg://resolve?domain=DokopatychBot" class="start-btn">
+            DESKTOP
+          </a>
+          <button class="start-btn" id="qrBtn">QR</button>
+        </div>
+      </div>
+
+      <div class="swiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide" id="slide-1">Ищешь, что посмотреть</div>
+          <div class="swiper-slide" id="slide-2">
+            Вспоминаешь, какой фильм или сериал стал для тебя родным
+          </div>
+          <div class="swiper-slide" id="slide-3">Присылаешь его мне</div>
+          <div class="swiper-slide" id="slide-4">
+            Прогоняю через алгоритм и подбираю тебе что-то ещё наподобие
+          </div>
+          <div class="swiper-slide" id="slide-5">
+            Темы разные. Главное, чтобы вайб был "как тогда"
+          </div>
+          <div class="swiper-slide" id="slide-6">
+            Выбирай по обложке, выбирай сердечком
+          </div>
+        </div>
+      </div>
+
+      <div class="faq">
+        <div class="faqCard">
+          <h3 id="faq-1-title">
+            Я делаю проще откапывание фильмов и сериалов 🎬🪤🐻
+          </h3>
+
+          <span id="faq-1-body"
+            >Ты присылаешь мне фильм или сериал, а я собираю тебе несколько
+            списков с чем-то, что может тебе тоже понравиться. Часто попадаются
+            малоизвестные фильмы и сериалы, которые смотрели полтора человека на
+            планете, но они хороши.</span
+          >
         </div>
 
-        <div class="botCard">
-            <img src="./images/round-sm.webp" alt="Аватар" class="avatar" />
-            <span class="name" id="botName">Докопатыч</span>
-            <span class="username">@DokopatychBot</span>
-            <h1 class="description" id="heroDescription">Бот для быстрого поиска кино <br /><br />
-                In memory of Jeff Baena
-            </h1>
-            <div class="btns-container">
-                <a href="https://t.me/DokopatychBot?start=landing" class="start-btn" target="_blank">
-                    WEB
-                </a>
-                <a href="tg://resolve?domain=DokopatychBot" class="start-btn"> DESKTOP </a>
-                <button class="start-btn" id="qrBtn">QR</button>
-            </div>
+        <div class="faqCard">
+          <h3 id="faq-2-title">Как я подбираю</h3>
+
+          <span id="faq-2-body"
+            >У меня мега хитрый алгоритм с использованием квантовых вычислений и
+            секретных методик фбр. Картины могут быть не связаны темами или
+            жанрами, здесь связь более глубокая. Рекомендации часто неожиданные.
+            Если тебе интересны просто темы космоса или пиратов, то лучше
+            обратиться к гуглу или gpt. Но если ты ищешь что-то, что вовлечёт
+            тебя <b>✨как тогда✨</b>,то здесь ко мне🫡</span
+          >
         </div>
 
-        <div class="swiper">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide" id="slide-1">Ищешь, что посмотреть</div>
-                <div class="swiper-slide" id="slide-2">Вспоминаешь, какой фильм или сериал стал для тебя родным</div>
-                <div class="swiper-slide" id="slide-3">Присылаешь его мне</div>
-                <div class="swiper-slide" id="slide-4">Прогоняю через алгоритм и подбираю тебе что-то ещё наподобие</div>
-                <div class="swiper-slide" id="slide-5">Темы разные. Главное, чтобы вайб был "как тогда"</div>
-                <div class="swiper-slide" id="slide-6">Выбирай по обложке, выбирай сердечком</div>
-            </div>
+        <div class="faqCard">
+          <h3 id="faq-3-title">Как выбирать</h3>
+          <span id="faq-3-body"
+            >Рекомендую ориентироваться только на название и обложку, выбирай
+            сердечком🫀</span
+          >
         </div>
 
-        <div class="faq">
-            <div class="faqCard">
-                <h3 id="faq-1-title">Я делаю проще откапывание фильмов и сериалов 🎬🪤🐻</h3>
-
-                <span id="faq-1-body">Ты присылаешь мне фильм или сериал, а я собираю тебе несколько списков с чем-то, что может тебе тоже
-                понравиться. Часто попадаются малоизвестные фильмы и сериалы, которые смотрели полтора человека на
-                планете, но они хороши.</span>
-            </div>
-
-            <div class="faqCard">
-                <h3 id="faq-2-title">Как я подбираю</h3>
-
-                <span id="faq-2-body">У меня мега хитрый алгоритм с использованием квантовых вычислений и секретных методик фбр. Картины
-                могут быть не связаны темами или жанрами, здесь связь более глубокая. Рекомендации часто
-                неожиданные. Если тебе интересны просто темы космоса или пиратов, то лучше обратиться к гуглу или
-                gpt.
-
-                Но если ты ищешь что-то, что вовлечёт тебя <b>✨как тогда✨</b>,то здесь ко мне🫡</span>
-            </div>
-
-            <div class="faqCard">
-                <h3 id="faq-3-title">Как выбирать</h3>
-                <span id="faq-3-body">Рекомендую ориентироваться только на название и обложку, выбирай сердечком🫀</span>
-            </div>
-
-            <div class="faqCard">
-                <h3 id="faq-4-title">Кто такой этот ваш Джефф Баена</h3>
-                <span id="faq-4-body">Это малоизвестный инди-сценарист и режиссёр, он упоминается в описании бота. Автору бота хотелось
-                бы, чтобы такие как Джефф получали больше внимания при жизни, не смотря на низкую распиаренность.</span>
-            </div>
-
-            <div class="faqCard">
-                <h3 id="faq-5-title">Откуда столько фильмов</h3>
-                <span id="faq-5-body">Источник сырых данных для алгоритма: TMDB. Он самый запаристый, самый наполненный и актуальный, есть
-                вообще всё. Не стесняйся искать что угодно.</span>
-            </div>
-
-            <div class="faqCard">
-                <h3 id="faq-6-title">Страницы по категориям</h3>
-                <p id="faq-6-body">Если ты ищешь конкретный формат, переходи сразу на нужную страницу:</p>
-                <ul>
-                    <li><a href="/pages/music-search-bot.html" id="category-1">Поиск музыки в Telegram</a></li>
-                    <li><a href="/pages/audiobook-search-bot.html" id="category-2">Поиск аудиокниг в Telegram</a></li>
-                    <li><a href="/pages/film-download-bot.html" id="category-3">Поиск фильмов и сериалов</a></li>
-                    <li><a href="/pages/game-search-bot.html" id="category-4">Поиск игр и больших файлов</a></li>
-                    <li><a href="/pages/file-search-bot.html" id="category-5">Поиск любых файлов без авторизации</a></li>
-                </ul>
-            </div>
+        <div class="faqCard">
+          <h3 id="faq-4-title">Кто такой этот ваш Джефф Баена</h3>
+          <span id="faq-4-body"
+            >Это малоизвестный инди-сценарист и режиссёр, он упоминается в
+            описании бота. Автору бота хотелось бы, чтобы такие как Джефф
+            получали больше внимания при жизни, не смотря на низкую
+            распиаренность.</span
+          >
         </div>
+
+        <div class="faqCard">
+          <h3 id="faq-5-title">Откуда столько фильмов</h3>
+          <span id="faq-5-body"
+            >Источник сырых данных для алгоритма: TMDB. Он самый запаристый,
+            самый наполненный и актуальный, есть вообще всё. Не стесняйся искать
+            что угодно.</span
+          >
+        </div>
+
+        <div class="faqCard">
+          <h3 id="faq-6-title">Страницы по категориям</h3>
+          <p id="faq-6-body">
+            Если ты ищешь конкретный формат, переходи сразу на нужную страницу:
+          </p>
+          <ul>
+            <li>
+              <a href="/pages/music-search-bot.html" id="category-1"
+                >Поиск музыки в Telegram</a
+              >
+            </li>
+            <li>
+              <a href="/pages/audiobook-search-bot.html" id="category-2"
+                >Поиск аудиокниг в Telegram</a
+              >
+            </li>
+            <li>
+              <a href="/pages/film-download-bot.html" id="category-3"
+                >Поиск фильмов и сериалов</a
+              >
+            </li>
+            <li>
+              <a href="/pages/game-search-bot.html" id="category-4"
+                >Поиск игр и больших файлов</a
+              >
+            </li>
+            <li>
+              <a href="/pages/file-search-bot.html" id="category-5"
+                >Поиск любых файлов без авторизации</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        const swiper = new Swiper('.swiper', {
-            direction: 'horizontal',
-            slidesPerView: 1,
-            allowTouchMove: true,
-            mousewheel: true,
-            loop: true,
-            keyboard: {
-                enabled: true,
-                onlyInViewport: false,
-            },
-            autoplay: {
-                delay: 3000,
-                disableOnInteraction: false,
-            },
-            pauseOnMouseEnter: true,
-            simulateTouch: true,
-        });
-        swiper.el.addEventListener('click', () => {
-            swiper.slideNext();
-        });
-
+      const swiper = new Swiper(".swiper", {
+        direction: "horizontal",
+        slidesPerView: 1,
+        allowTouchMove: true,
+        mousewheel: true,
+        loop: true,
+        keyboard: {
+          enabled: true,
+          onlyInViewport: false,
+        },
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+        },
+        pauseOnMouseEnter: true,
+        simulateTouch: true,
+      })
+      swiper.el.addEventListener("click", () => {
+        swiper.slideNext()
+      })
     </script>
-</body>
-
+  </body>
 </html>
