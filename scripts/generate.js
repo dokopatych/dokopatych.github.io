@@ -5,7 +5,7 @@ const { movieQueries, tvQueries } = require("../keys.js")
 
 // Point ROOT to the project root (one level up from this scripts/ directory)
 const ROOT = path.resolve(__dirname, "..")
-const BASE_URL = "https://dokopatych.github.io"
+const BASE_URL = "https://dokopatych.vercel.app"
 const TODAY = new Date().toISOString().slice(0, 10)
 const SITEMAP_PATH = path.join(ROOT, "sitemap.xml")
 const LINKS_LIST_PATH = path.join(ROOT, "all-links.txt")
@@ -176,12 +176,12 @@ function buildMoviePageHtml(movie) {
     <meta property="og:title" content="${escapeHtml(config.title)}" />
     <meta property="og:site_name" content="Докопатыч" />
     <meta property="og:description" content="${escapeHtml(config.description)}" />
-    <meta property="og:image" content="https://dokopatych.github.io/images/square.webp" />
+    <meta property="og:image" content="https://dokopatych.vercel.app/images/square.webp" />
     <meta property="og:url" content="${escapeHtml(config.url)}" />
     <meta property="og:type" content="website" />
     <link rel="canonical" href="${escapeHtml(config.url)}">
-    <link rel="icon" href="https://dokopatych.github.io/images/round-sm.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="https://dokopatych.github.io/images/round-sm.ico" />
+    <link rel="icon" href="https://dokopatych.vercel.app/images/round-sm.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="https://dokopatych.vercel.app/images/round-sm.ico" />
     <link rel="stylesheet" href="../styles.css" />
     <script type="application/ld+json" data-jsonld></script>
 

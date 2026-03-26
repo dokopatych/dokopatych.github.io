@@ -1,3 +1,7 @@
 <script>
-  window.location.replace("https://dokopatych.github.io");
+  (function () {
+    const isLegacyGithubHost = window.location.hostname === 'dokopatych.github.io' || window.location.hostname === 'www.dokopatych.github.io';
+    const base = isLegacyGithubHost ? 'https://dokopatych.vercel.app' : window.location.origin;
+    window.location.replace(`${base}/`);
+  })();
 </script>
