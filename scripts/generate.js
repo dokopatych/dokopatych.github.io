@@ -10,6 +10,7 @@ const TODAY = new Date().toISOString().slice(0, 10)
 const SITEMAP_PATH = path.join(ROOT, "sitemap.xml")
 const LINKS_LIST_PATH = path.join(ROOT, "all-links.txt")
 const PAGES_DIR = path.join(ROOT, "pages")
+const ABOUT_MOVIE_DIR = path.join(PAGES_DIR, "about-movie")
 
 const NON_INDEXED_PAGE_PATTERNS = [/^pages\/skachat-film-.*\.html$/]
 
@@ -77,8 +78,39 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;")
 }
 
-function moviePagePath(movieId) {
-  return `/pages/about-movie/${movieId}.html`
+function slugifyMovieTitle(value) {
+  const slug = String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/['"`‘’“”«»]/g, "")
+    .replace(/[^a-z0-9а-яё]+/gi, "-")
+    .replace(/^-+|-+$/g, "")
+
+  return slug || "movie"
+}
+
+function createMovieRouteMap(movies) {
+  const slugCounts = new Map()
+
+  return new Map(
+    movies.map((movie) => {
+      const baseSlug = slugifyMovieTitle(movie.original_title || movie.title)
+      const count = slugCounts.get(baseSlug) || 0
+      slugCounts.set(baseSlug, count + 1)
+      const slug = count ? `${baseSlug}-${count + 1}` : baseSlug
+
+      return [movie.id, { slug, urlPath: `/pages/about-movie/${slug}` }]
+    }),
+  )
+}
+
+function moviePagePath(movie, movieRoutesById) {
+  return movieRoutesById.get(movie.id)?.urlPath || `/pages/about-movie/${movie.id}`
+}
+
+function moviePageFilePath(movie, movieRoutesById) {
+  return path.join(ROOT, moviePagePath(movie, movieRoutesById), "index.html")
 }
 
 function toAbsoluteUrl(relativePath) {
@@ -141,7 +173,7 @@ function pickTagCloudQueries(movie, limit = 20) {
   return [...new Set(merged)].slice(0, limit)
 }
 
-function buildIntentConfig(movie, tagCloudQueries) {
+function buildIntentConfig(movie, tagCloudQueries, movieRoutesById) {
   const quotedTitle = `«${movie.title}»`
   const media = resolveMediaCopy(movie.media_type)
   const queryHighlights = tagCloudQueries.slice(0, 6)
@@ -149,7 +181,7 @@ function buildIntentConfig(movie, tagCloudQueries) {
 
   return {
     title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
-    url: toAbsoluteUrl(moviePagePath(movie.id)),
+    url: toAbsoluteUrl(moviePagePath(movie, movieRoutesById)),
     h1: `Скачать ${media.nounAccusative} ${quotedTitle}`,
     h2: `${media.nounAccusative} ${quotedTitle}`,
     description: `${movie.overview}`,
@@ -166,9 +198,28 @@ function buildIntentConfig(movie, tagCloudQueries) {
   }
 }
 
-function buildMoviePageHtml(movie) {
-  const config = buildIntentConfig(movie, pickTagCloudQueries(movie))
+function mapMovieForIntentLink(movie, movieRoutesById) {
+  const route = movieRoutesById.get(movie.id)
+
+  if (!route) {
+    return movie
+  }
+
+  return { ...movie, id: route.slug }
+}
+
+function buildMoviePageHtml(movie, movieRoutesById) {
+  const config = buildIntentConfig(
+    movie,
+    pickTagCloudQueries(movie),
+    movieRoutesById,
+  )
   const configJson = JSON.stringify(config)
+  const relatedMoviesForIntent = JSON.stringify(
+    flattenPopularMovies(popularMovies)
+      .filter((item) => item.id !== movie.id)
+      .map((item) => mapMovieForIntentLink(item, movieRoutesById)),
+  )
 
   return `<!doctype html>
 <html lang="ru">
@@ -214,7 +265,7 @@ function buildMoviePageHtml(movie) {
     <script>
         window.INTENT_PAGE_CONFIG = ${configJson};
         window.FILM_DOWNLOAD_PAGE_CONFIG = {
-            movies: (window.popularMovies || []).filter((movie) => movie.id !== ${movie.id}),
+            movies: ${relatedMoviesForIntent},
             limit: 10,
             linkType: 'intent',
             emptyText: 'Список скоро обновится.',
@@ -235,6 +286,14 @@ function buildMoviePageHtml(movie) {
         })();
     </script>
     <script src="../seo-intent-page.js"></script>
+    <script>
+      (function() {
+        var links = document.querySelectorAll('[data-popular-movies] a[href$=".html"]');
+        links.forEach(function(link) {
+          link.setAttribute('href', link.getAttribute('href').replace(/\\.html$/, ''));
+        });
+      })();
+    </script>
 </body>
 </html>
 `
@@ -247,10 +306,14 @@ function flattenPopularMovies(source) {
 }
 
 function writeMoviePages() {
-  flattenPopularMovies(popularMovies).forEach((movie) => {
-    const filePath = path.join(ROOT, moviePagePath(movie.id))
+  const movies = flattenPopularMovies(popularMovies)
+  const movieRoutesById = createMovieRouteMap(movies)
+  fs.rmSync(ABOUT_MOVIE_DIR, { recursive: true, force: true })
+
+  movies.forEach((movie) => {
+    const filePath = moviePageFilePath(movie, movieRoutesById)
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
-    fs.writeFileSync(filePath, buildMoviePageHtml(movie))
+    fs.writeFileSync(filePath, buildMoviePageHtml(movie, movieRoutesById))
   })
 }
 
@@ -279,7 +342,12 @@ function readAllHtmlPages(dir = PAGES_DIR) {
       return []
     }
 
-    return [toAbsoluteUrl(`/${relativePath}`)]
+    if (relativePath === "index.html") {
+      return [toAbsoluteUrl("/")]
+    }
+
+    const cleanRelativePath = relativePath.replace(/\/index\.html$/, "")
+    return [toAbsoluteUrl(`/${cleanRelativePath}`)]
   })
 }
 
