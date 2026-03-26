@@ -11,6 +11,8 @@ const SITEMAP_PATH = path.join(ROOT, "sitemap.xml")
 const LINKS_LIST_PATH = path.join(ROOT, "all-links.txt")
 const PAGES_DIR = path.join(ROOT, "pages")
 
+const NON_INDEXED_PAGE_PATTERNS = [/^pages\/skachat-film-.*\.html$/]
+
 const SEO_BASE_PAGES = [
   { loc: `${BASE_URL}/`, changefreq: "daily", priority: "1.0" },
   // { loc: `${BASE_URL}/pages/music-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
@@ -79,6 +81,10 @@ function moviePagePath(movieId) {
   return `/pages/about-movie/${movieId}.html`
 }
 
+function toAbsoluteUrl(relativePath) {
+  return `${BASE_URL}${relativePath}`
+}
+
 function resolveMediaType(mediaType) {
   return mediaType === "tv" ? "tv" : "movie"
 }
@@ -143,7 +149,7 @@ function buildIntentConfig(movie, tagCloudQueries) {
 
   return {
     title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
-    url: `${BASE_URL}/${moviePagePath(movie.id)}`,
+    url: toAbsoluteUrl(moviePagePath(movie.id)),
     h1: `Скачать ${media.nounAccusative} ${quotedTitle}`,
     h2: `${media.nounAccusative} ${quotedTitle}`,
     description: `${movie.overview}`,
@@ -243,19 +249,38 @@ function flattenPopularMovies(source) {
 function writeMoviePages() {
   flattenPopularMovies(popularMovies).forEach((movie) => {
     const filePath = path.join(ROOT, moviePagePath(movie.id))
+    fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, buildMoviePageHtml(movie))
   })
 }
 
-function readAllHtmlPages() {
-  if (!fs.existsSync(PAGES_DIR)) {
+function isIndexablePage(relativePath) {
+  return !NON_INDEXED_PAGE_PATTERNS.some((pattern) => pattern.test(relativePath))
+}
+
+function readAllHtmlPages(dir = PAGES_DIR) {
+  if (!fs.existsSync(dir)) {
     return []
   }
 
-  return fs
-    .readdirSync(PAGES_DIR)
-    .filter((fileName) => fileName.endsWith(".html"))
-    .map((fileName) => `${BASE_URL}/pages/${fileName}`)
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(dir, entry.name)
+
+    if (entry.isDirectory()) {
+      return readAllHtmlPages(entryPath)
+    }
+
+    if (!entry.isFile() || !entry.name.endsWith(".html")) {
+      return []
+    }
+
+    const relativePath = path.relative(ROOT, entryPath).split(path.sep).join("/")
+    if (!isIndexablePage(relativePath)) {
+      return []
+    }
+
+    return [toAbsoluteUrl(`/${relativePath}`)]
+  })
 }
 
 function buildSitemapEntry({ loc, changefreq, priority }) {
