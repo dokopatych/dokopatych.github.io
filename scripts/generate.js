@@ -2,6 +2,10 @@ const fs = require("fs")
 const path = require("path")
 const { popularMovies } = require("../movies.js")
 const { movieQueries, tvQueries } = require("../keys.js")
+const {
+  createMovieRouteMap,
+  normalizePagePath,
+} = require("../movie-routes.js")
 
 // Point ROOT to the project root (one level up from this scripts/ directory)
 const ROOT = path.resolve(__dirname, "..")
@@ -78,33 +82,6 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;")
 }
 
-function slugifyMovieTitle(value) {
-  const slug = String(value || "")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/['"`‘’“”«»]/g, "")
-    .replace(/[^a-z0-9а-яё]+/gi, "-")
-    .replace(/^-+|-+$/g, "")
-
-  return slug || "movie"
-}
-
-function createMovieRouteMap(movies) {
-  const slugCounts = new Map()
-
-  return new Map(
-    movies.map((movie) => {
-      const baseSlug = slugifyMovieTitle(movie.original_title || movie.title)
-      const count = slugCounts.get(baseSlug) || 0
-      slugCounts.set(baseSlug, count + 1)
-      const slug = count ? `${baseSlug}-${count + 1}` : baseSlug
-
-      return [movie.id, { slug, urlPath: `/pages/about-movie/${slug}` }]
-    }),
-  )
-}
-
 function moviePagePath(movie, movieRoutesById) {
   return movieRoutesById.get(movie.id)?.urlPath || `/pages/about-movie/${movie.id}`
 }
@@ -115,12 +92,6 @@ function moviePageFilePath(movie, movieRoutesById) {
 
 function toAbsoluteUrl(relativePath) {
   return `${BASE_URL}${normalizePagePath(relativePath)}`
-}
-
-function normalizePagePath(urlPath) {
-  return String(urlPath || "")
-    .replace(/\/index\.html$/i, "")
-    .replace(/\.html$/i, "")
 }
 
 function resolveMediaType(mediaType) {
@@ -291,6 +262,7 @@ function buildMoviePageHtml(movie, movieRoutesById) {
           btns.appendChild(a);
         })();
     </script>
+    <script src="../movie-routes.js"></script>
     <script src="../seo-intent-page.js"></script>
 </body>
 </html>

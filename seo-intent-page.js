@@ -10,11 +10,13 @@ const COMMON_NAV_LINKS = [
 const TELEGRAM_MOVIE_SEARCH_PREFIX =
   "https://t.me/DokopatychBot?start=searchTr-"
 
-function normalizePagePath(urlPath) {
-  return String(urlPath || "")
-    .replace(/\/index\.html$/i, "")
-    .replace(/\.html$/i, "")
-}
+const normalizePagePath =
+  window.movieRoutes?.normalizePagePath ||
+  function (urlPath) {
+    return String(urlPath || "")
+      .replace(/\/index\.html$/i, "")
+      .replace(/\.html$/i, "")
+  }
 
 function escapeHtml(value) {
   return String(value)
@@ -99,13 +101,18 @@ function buildMovieDeepLink(movie) {
   return `${TELEGRAM_MOVIE_SEARCH_PREFIX}${movie.id}-${resolveMediaType(movie.media_type)}-lnd`
 }
 
-function buildMovieIntentLink(movieId) {
-  return normalizePagePath(`/pages/about-movie/${movieId}`)
+function buildMovieIntentLink(movie, config = {}) {
+  const routeMap = config.movieRoutesById
+  if (window.movieRoutes?.buildMovieIntentPath) {
+    return window.movieRoutes.buildMovieIntentPath(movie, routeMap)
+  }
+
+  return normalizePagePath(`/pages/about-movie/${movie.id}`)
 }
 
 function resolveMovieLink(movie, config = {}) {
   if (config.linkType === "intent") {
-    return buildMovieIntentLink(movie.id)
+    return buildMovieIntentLink(movie, config)
   }
 
   return buildMovieDeepLink(movie)
@@ -149,6 +156,11 @@ function initIntentPage(config) {
 }
 
 function initFilmDownloadPage(config = {}) {
+  const rawMovies = Array.isArray(window.popularMovies) ? window.popularMovies : []
+  if (window.movieRoutes?.createMovieRouteMap && rawMovies.length) {
+    config.movieRoutesById = window.movieRoutes.createMovieRouteMap(rawMovies)
+  }
+
   const title = document.querySelector("[data-popular-movies-title]")
   if (title && config.title) {
     title.textContent = config.title
