@@ -1,14 +1,20 @@
 const COMMON_NAV_LINKS = [
   { href: "/", label: "Главная страница" },
-  { href: "/pages/music-search-bot.html", label: "Поиск музыки" },
-  { href: "/pages/audiobook-search-bot.html", label: "Поиск аудиокниг" },
-  { href: "/pages/film-download-bot.html", label: "Поиск фильмов и сериалов" },
-  { href: "/pages/game-search-bot.html", label: "Поиск игр и программ" },
-  { href: "/pages/file-search-bot.html", label: "Поиск файлов и медиа" },
+  { href: "/pages/music-search-bot", label: "Поиск музыки" },
+  { href: "/pages/audiobook-search-bot", label: "Поиск аудиокниг" },
+  { href: "/pages/film-download-bot", label: "Поиск фильмов и сериалов" },
+  { href: "/pages/game-search-bot", label: "Поиск игр и программ" },
+  { href: "/pages/file-search-bot", label: "Поиск файлов и медиа" },
 ]
 
 const TELEGRAM_MOVIE_SEARCH_PREFIX =
   "https://t.me/DokopatychBot?start=searchTr-"
+
+function normalizePagePath(urlPath) {
+  return String(urlPath || "")
+    .replace(/\/index\.html$/i, "")
+    .replace(/\.html$/i, "")
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -94,7 +100,7 @@ function buildMovieDeepLink(movie) {
 }
 
 function buildMovieIntentLink(movieId) {
-  return `/pages/about-movie/${movieId}.html`
+  return normalizePagePath(`/pages/about-movie/${movieId}`)
 }
 
 function resolveMovieLink(movie, config = {}) {
