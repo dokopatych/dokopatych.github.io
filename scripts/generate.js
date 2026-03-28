@@ -16,14 +16,14 @@ const NON_INDEXED_PAGE_PATTERNS = [/^pages\/skachat-film-.*\.html$/]
 
 const SEO_BASE_PAGES = [
   { loc: `${BASE_URL}/`, changefreq: "daily", priority: "1.0" },
-  // { loc: `${BASE_URL}/pages/music-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/audiobook-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/film-download-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/game-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/file-search-bot.html`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/skachat-albom-artista.html`, changefreq: 'weekly', priority: '0.8' },
-  // { loc: `${BASE_URL}/pages/skachat-audioknigu-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
-  // { loc: `${BASE_URL}/pages/skachat-serial-nazvanie.html`, changefreq: 'weekly', priority: '0.8' },
+  // { loc: `${BASE_URL}/pages/music-search-bot`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/audiobook-search-bot`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/film-download-bot`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/game-search-bot`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/file-search-bot`, changefreq: 'weekly', priority: '0.9' },
+  // { loc: `${BASE_URL}/pages/skachat-albom-artista`, changefreq: 'weekly', priority: '0.8' },
+  // { loc: `${BASE_URL}/pages/skachat-audioknigu-nazvanie`, changefreq: 'weekly', priority: '0.8' },
+  // { loc: `${BASE_URL}/pages/skachat-serial-nazvanie`, changefreq: 'weekly', priority: '0.8' },
 ]
 const SEO_BASE_PAGES_BY_LOC = new Map(
   SEO_BASE_PAGES.map((page) => [page.loc, page]),
@@ -114,7 +114,13 @@ function moviePageFilePath(movie, movieRoutesById) {
 }
 
 function toAbsoluteUrl(relativePath) {
-  return `${BASE_URL}${relativePath}`
+  return `${BASE_URL}${normalizePagePath(relativePath)}`
+}
+
+function normalizePagePath(urlPath) {
+  return String(urlPath || "")
+    .replace(/\/index\.html$/i, "")
+    .replace(/\.html$/i, "")
 }
 
 function resolveMediaType(mediaType) {
@@ -286,14 +292,6 @@ function buildMoviePageHtml(movie, movieRoutesById) {
         })();
     </script>
     <script src="../seo-intent-page.js"></script>
-    <script>
-      (function() {
-        var links = document.querySelectorAll('[data-popular-movies] a[href$=".html"]');
-        links.forEach(function(link) {
-          link.setAttribute('href', link.getAttribute('href').replace(/\\.html$/, ''));
-        });
-      })();
-    </script>
 </body>
 </html>
 `
@@ -346,8 +344,7 @@ function readAllHtmlPages(dir = PAGES_DIR) {
       return [toAbsoluteUrl("/")]
     }
 
-    const cleanRelativePath = relativePath.replace(/\/index\.html$/, "")
-    return [toAbsoluteUrl(`/${cleanRelativePath}`)]
+    return [toAbsoluteUrl(`/${relativePath}`)]
   })
 }
 
