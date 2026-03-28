@@ -15,6 +15,14 @@ const SITEMAP_PATH = path.join(ROOT, "sitemap.xml")
 const LINKS_LIST_PATH = path.join(ROOT, "all-links.txt")
 const PAGES_DIR = path.join(ROOT, "pages")
 const ABOUT_MOVIE_DIR = path.join(PAGES_DIR, "about-movie")
+const ROOT_ASSETS = {
+  analytics: "/analytics.js",
+  styles: "/styles.css",
+  avatar: "/images/round-sm.webp",
+  movieRoutes: "/movie-routes.js",
+  seoIntentPage: "/seo-intent-page.js",
+  movies: "/movies.js",
+}
 
 const NON_INDEXED_PAGE_PATTERNS = [/^pages\/skachat-film-.*\.html$/]
 
@@ -92,6 +100,10 @@ function moviePageFilePath(movie, movieRoutesById) {
 
 function toAbsoluteUrl(relativePath) {
   return `${BASE_URL}${normalizePagePath(relativePath)}`
+}
+
+function rootAsset(asset) {
+  return ROOT_ASSETS[asset]
 }
 
 function resolveMediaType(mediaType) {
@@ -203,7 +215,7 @@ function buildMoviePageHtml(movie, movieRoutesById) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="../analytics.js"></script>
+    <script src="${rootAsset("analytics")}"></script>
     <title>${escapeHtml(config.title)}</title>
     <meta name="description" content="${escapeHtml(config.description)}" />
     <meta name="application-name" content="${escapeHtml(config.applicationName)}" />
@@ -216,7 +228,7 @@ function buildMoviePageHtml(movie, movieRoutesById) {
     <link rel="canonical" href="${escapeHtml(config.url)}">
     <link rel="icon" href="https://dokopatych.vercel.app/images/round-sm.ico" type="image/x-icon">
     <link rel="shortcut icon" href="https://dokopatych.vercel.app/images/round-sm.ico" />
-    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="${rootAsset("styles")}" />
     <script type="application/ld+json" data-jsonld></script>
 
 </head>
@@ -224,7 +236,7 @@ function buildMoviePageHtml(movie, movieRoutesById) {
     <div class="backGround"></div>
     <div class='column'>
         <div class="botCard">
-            <img src="../images/round-sm.webp" alt="Аватар" class="avatar" />
+            <img src="${rootAsset("avatar")}" alt="Аватар" class="avatar" />
             <span class="name">Докопатыч</span>
             <span class="username">@DokopatychBot</span>
             <h1 class="description" data-h1>${escapeHtml(config.h1)}</h1>
@@ -238,7 +250,7 @@ function buildMoviePageHtml(movie, movieRoutesById) {
             <div class="faqCard"><h3>${escapeHtml(config.popularTitle)}</h3><ul data-popular-movies></ul></div>
         </div>
     </div>
-    <script src="../movies.js"></script>
+    <script src="${rootAsset("movies")}"></script>
     <script>
         window.INTENT_PAGE_CONFIG = ${configJson};
         window.FILM_DOWNLOAD_PAGE_CONFIG = {
@@ -262,8 +274,8 @@ function buildMoviePageHtml(movie, movieRoutesById) {
           btns.appendChild(a);
         })();
     </script>
-    <script src="../movie-routes.js"></script>
-    <script src="../seo-intent-page.js"></script>
+    <script src="${rootAsset("movieRoutes")}"></script>
+    <script src="${rootAsset("seoIntentPage")}"></script>
 </body>
 </html>
 `
