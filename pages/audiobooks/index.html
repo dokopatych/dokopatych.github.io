@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="/analytics.js"></script>
+  <title>Аудиокниги — подборки Докопатыча</title>
+  <meta name="description" content="Раздел с аудиокнигами и переходами в Telegram-бота." />
+  <meta property="og:title" content="Аудиокниги — подборки Докопатыча" />
+  <meta property="og:description" content="Раздел с аудиокнигами и переходами в Telegram-бота." />
+  <meta property="og:url" content="https://dokopatych.vercel.app/pages/audiobooks" />
+  <link rel="canonical" href="https://dokopatych.vercel.app/pages/audiobooks" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="backGround"></div>
+  <div class="column">
+    <div class="faq">
+      <div class="faqCard">
+        <h1 data-section-h1>Аудиокниги</h1>
+        <p data-section-description></p>
+      </div>
+      <div class="faqCard">
+        <h3>Популярные страницы</h3>
+        <ul data-section-list></ul>
+      </div>
+      <div class="faqCard">
+        <h3>Навигация</h3>
+        <ul data-section-nav></ul>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.SECTION_INDEX_CONFIG = {
+      title: 'Аудиокниги — подборки Докопатыча',
+      h1: 'Аудиокниги',
+      description: 'Страница-навигация по аудиокнигам.',
+      canonical: 'https://dokopatych.vercel.app/pages/audiobooks',
+      items: [
+        { href: '/pages/audiobooks/твое-сердце-будет-разбито', label: 'Твое сердце будет разбито' },
+        { href: '/pages/audiobooks/project-hail-mary', label: 'Проект Аве Мария' }
+      ],
+      navLinks: [
+        { href: '/', label: 'Главная страница' },
+        { href: '/pages/audiobook-search-bot', label: 'Поиск аудиокниг' },
+        { href: '/pages/about-movie', label: 'Фильмы и сериалы' },
+        { href: '/pages/music', label: 'Музыка' }
+      ]
+    }
+  </script>
+  <script src="/pages/section-index.js"></script>
+</body>
+</html>

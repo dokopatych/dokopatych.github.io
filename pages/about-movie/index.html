@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="/analytics.js"></script>
+  <title>Фильмы и сериалы — подборки Докопатыча</title>
+  <meta name="description" content="Навигация по страницам фильмов и сериалов Докопатыча." />
+  <meta property="og:title" content="Фильмы и сериалы — подборки Докопатыча" />
+  <meta property="og:description" content="Навигация по страницам фильмов и сериалов Докопатыча." />
+  <meta property="og:url" content="https://dokopatych.vercel.app/pages/about-movie" />
+  <link rel="canonical" href="https://dokopatych.vercel.app/pages/about-movie" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="backGround"></div>
+  <div class="column">
+    <div class="faq">
+      <div class="faqCard">
+        <h1 data-section-h1>Фильмы и сериалы</h1>
+        <p data-section-description></p>
+      </div>
+      <div class="faqCard">
+        <h3>Популярные страницы</h3>
+        <ul data-section-list></ul>
+      </div>
+      <div class="faqCard">
+        <h3>Навигация</h3>
+        <ul data-section-nav></ul>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.SECTION_INDEX_CONFIG = {
+      title: 'Фильмы и сериалы — подборки Докопатыча',
+      h1: 'Фильмы и сериалы',
+      description: 'Страница-навигация по фильмам и сериалам. Выберите нужную подборку.',
+      canonical: 'https://dokopatych.vercel.app/pages/about-movie',
+      items: [
+        { href: '/pages/film-download-bot', label: 'Поиск фильмов и сериалов' },
+        { href: '/pages/chto-posmotret-vecherom', label: 'Что посмотреть вечером' },
+        { href: '/pages/neochevidnye-filmy', label: 'Неочевидные фильмы и сериалы' },
+        { href: '/pages/filmy-kak', label: 'Фильмы как… (подбор по вайбу)' }
+      ],
+      navLinks: [
+        { href: '/', label: 'Главная страница' },
+        { href: '/pages/audiobooks', label: 'Аудиокниги' },
+        { href: '/pages/music', label: 'Музыка' },
+        { href: '/pages/games', label: 'Игры' },
+        { href: '/pages/books', label: 'Книги' }
+      ]
+    }
+  </script>
+  <script src="/pages/section-index.js"></script>
+</body>
+</html>

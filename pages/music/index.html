@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="/analytics.js"></script>
+  <title>Музыка — подборки Докопатыча</title>
+  <meta name="description" content="Раздел с музыкальными страницами и переходами в Telegram-бота." />
+  <meta property="og:title" content="Музыка — подборки Докопатыча" />
+  <meta property="og:description" content="Раздел с музыкальными страницами и переходами в Telegram-бота." />
+  <meta property="og:url" content="https://dokopatych.vercel.app/pages/music" />
+  <link rel="canonical" href="https://dokopatych.vercel.app/pages/music" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="backGround"></div>
+  <div class="column">
+    <div class="faq">
+      <div class="faqCard">
+        <h1 data-section-h1>Музыка</h1>
+        <p data-section-description></p>
+      </div>
+      <div class="faqCard">
+        <h3>Популярные страницы</h3>
+        <ul data-section-list></ul>
+      </div>
+      <div class="faqCard">
+        <h3>Навигация</h3>
+        <ul data-section-nav></ul>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.SECTION_INDEX_CONFIG = {
+      title: 'Музыка — подборки Докопатыча',
+      h1: 'Музыка',
+      description: 'Страница-навигация по музыкальным релизам.',
+      canonical: 'https://dokopatych.vercel.app/pages/music',
+      items: [
+        { href: '/pages/music/raye-this-music-may-contain-hope', label: 'RAYE — This Music May Contain Hope' }
+      ],
+      navLinks: [
+        { href: '/', label: 'Главная страница' },
+        { href: '/pages/music-search-bot', label: 'Поиск музыки' },
+        { href: '/pages/audiobooks', label: 'Аудиокниги' },
+        { href: '/pages/about-movie', label: 'Фильмы и сериалы' }
+      ]
+    }
+  </script>
+  <script src="/pages/section-index.js"></script>
+</body>
+</html>
