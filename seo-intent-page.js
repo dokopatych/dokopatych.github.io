@@ -135,7 +135,12 @@ function renderJsonLd(config) {
 }
 
 function resolveMediaType(mediaType) {
-  return mediaType === "tv" ? "tv" : "movie"
+  const normalized = String(mediaType || "").toLowerCase()
+  if (["tv", "aud", "game", "music", "book"].includes(normalized)) {
+    return normalized
+  }
+
+  return "movie"
 }
 
 function buildMovieDeepLink(movie) {
@@ -167,7 +172,7 @@ function renderPopularMovies(config = {}) {
   const limit = Number.isFinite(config.limit) ? config.limit : source.length
   const items = source
     .slice(0, limit)
-    .filter((movie) => movie && movie.id && movie.title)
+    .filter((movie) => movie && movie.id && (movie.title || movie.original_title))
 
   if (!items.length) {
     container.innerHTML = `<li>${config.emptyText || "Список скоро обновится."}</li>`
@@ -180,7 +185,7 @@ function renderPopularMovies(config = {}) {
   container.innerHTML = items
     .map(
       (movie) =>
-        `<li><a href="${resolveMovieLink(movie, config)}" target="${target}"${rel}>${movie.title}</a></li>`,
+        `<li><a href="${resolveMovieLink(movie, config)}" target="${target}"${rel}>${movie.title || movie.original_title}</a></li>`,
     )
     .join("")
 }

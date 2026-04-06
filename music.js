@@ -7,3 +7,11 @@ const popularMusic = [
 		"release_date": "2026-03-26"
 	}
 ]
+
+if (typeof window !== 'undefined') {
+	window.popularMusic = popularMusic;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+	module.exports = { popularMusic };
+}

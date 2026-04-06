@@ -1,10 +1,15 @@
 const fs = require("fs")
 const path = require("path")
 const { popularMovies } = require("../movies.js")
+const { popularAudiobooks = [] } = require("../audiobooks.js")
+const { popularGames = [] } = require("../games.js")
+const { popularMusic = [] } = require("../music.js")
+const { popularBooks = [] } = require("../books.js")
 const { movieQueries, tvQueries } = require("../keys.js")
 const {
   createMovieRouteMap,
   normalizePagePath,
+  slugifyMovieTitle,
 } = require("../movie-routes.js")
 
 // Point ROOT to the project root (one level up from this scripts/ directory)
@@ -163,12 +168,18 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;")
 }
 
-function moviePagePath(movie, movieRoutesById) {
-  return movieRoutesById.get(movie.id)?.urlPath || `/pages/about-movie/${movie.id}`
+function collectionPagePath(item, collection, routesById) {
+  const section = SECTION_CONFIG[collection]
+  const routePath = routesById?.get(item.id)?.urlPath
+  if (routePath) {
+    return routePath
+  }
+
+  return `/pages/${section.dir}/${item.id}`
 }
 
-function moviePageFilePath(movie, movieRoutesById) {
-  return path.join(ROOT, moviePagePath(movie, movieRoutesById), "index.html")
+function collectionPageFilePath(item, collection, routesById) {
+  return path.join(ROOT, collectionPagePath(item, collection, routesById), "index.html")
 }
 
 function toAbsoluteUrl(relativePath) {
@@ -326,7 +337,9 @@ function buildIntentConfig(movie, tagCloudQueries, movieRoutesById, options = {}
 
   return {
     title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
-    url: toAbsoluteUrl(moviePagePath(movie, movieRoutesById)),
+    url: toAbsoluteUrl(
+      collectionPagePath(movie, options.collection || "movies", movieRoutesById),
+    ),
     h1: `Скачать ${media.nounAccusative} ${quotedTitle}`,
     h2: `${media.nounAccusative} ${quotedTitle}`,
     description: `${movie.overview}`,
@@ -355,6 +368,8 @@ function mapMovieForIntentLink(movie, movieRoutesById) {
 }
 
 function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
+  const collection = options.collection || "movies"
+  const source = flattenPopularItems(options.items || popularMovies)
   const config = buildIntentConfig(
     movie,
     pickTagCloudQueries(movie),
@@ -362,10 +377,14 @@ function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
     options,
   )
   const configJson = JSON.stringify(config)
-  const relatedMoviesForIntent = JSON.stringify(
-    flattenPopularMovies(popularMovies)
+  const relatedItemsForIntent = JSON.stringify(
+    source
       .filter((item) => item.id !== movie.id)
-      .map((item) => mapMovieForIntentLink(item, movieRoutesById)),
+      .map((item) =>
+        options.linkType === "intent"
+          ? mapMovieForIntentLink(item, movieRoutesById)
+          : item,
+      ),
   )
 
   return `<!doctype html>
@@ -412,9 +431,9 @@ function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
     <script>
         window.INTENT_PAGE_CONFIG = ${configJson};
         window.FILM_DOWNLOAD_PAGE_CONFIG = {
-            movies: ${relatedMoviesForIntent},
+            movies: ${relatedItemsForIntent},
             limit: 10,
-            linkType: 'intent',
+            linkType: ${JSON.stringify(options.linkType || "deep")},
             emptyText: 'Список скоро обновится.',
         };
         (function() {
@@ -439,21 +458,96 @@ function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
 `
 }
 
-function flattenPopularMovies(source) {
-  return source
-    .flat(Infinity)
-    .filter((item) => item && typeof item === "object" && item.id && item.title)
+function normalizePopularItem(item, fallbackMediaType) {
+  const mediaType = item.media_type || fallbackMediaType || "movie"
+  const title = item.title || item.original_title
+  return {
+    ...item,
+    title,
+    media_type: mediaType,
+  }
 }
 
-function writeMoviePages() {
-  const movies = flattenPopularMovies(popularMovies)
-  const movieRoutesById = createMovieRouteMap(movies)
-  fs.rmSync(ABOUT_MOVIE_DIR, { recursive: true, force: true })
+function flattenPopularItems(source, fallbackMediaType) {
+  return source
+    .flat(Infinity)
+    .filter((item) => item && typeof item === "object" && item.id)
+    .map((item) => normalizePopularItem(item, fallbackMediaType))
+    .filter((item) => item.title)
+}
 
-  movies.forEach((movie) => {
-    const filePath = moviePageFilePath(movie, movieRoutesById)
-    fs.mkdirSync(path.dirname(filePath), { recursive: true })
-    fs.writeFileSync(filePath, buildMoviePageHtml(movie, movieRoutesById))
+function createCollectionRouteMap(items, collection) {
+  if (collection === "movies") {
+    return createMovieRouteMap(items)
+  }
+
+  const section = SECTION_CONFIG[collection]
+  const slugCounts = new Map()
+
+  return new Map(
+    items.map((item) => {
+      const baseSlug = slugifyMovieTitle(item.original_title || item.title)
+      const count = slugCounts.get(baseSlug) || 0
+      slugCounts.set(baseSlug, count + 1)
+      const slug = count ? `${baseSlug}-${count + 1}` : baseSlug
+
+      return [item.id, { slug, urlPath: `/pages/${section.dir}/${slug}` }]
+    }),
+  )
+}
+
+function writeCollectionPages() {
+  const collections = [
+    {
+      key: "movies",
+      items: flattenPopularItems(popularMovies, "movie"),
+      outputDir: ABOUT_MOVIE_DIR,
+      options: { collection: "movies", linkType: "intent" },
+    },
+    {
+      key: "audiobooks",
+      items: flattenPopularItems(popularAudiobooks, "aud"),
+      outputDir: path.join(PAGES_DIR, SECTION_CONFIG.audiobooks.dir),
+      options: { collection: "audiobooks", telegramType: "aud", linkType: "deep" },
+    },
+    {
+      key: "games",
+      items: flattenPopularItems(popularGames, "game"),
+      outputDir: path.join(PAGES_DIR, SECTION_CONFIG.games.dir),
+      options: { collection: "games", telegramType: "game", linkType: "deep" },
+    },
+    {
+      key: "music",
+      items: flattenPopularItems(popularMusic, "music"),
+      outputDir: path.join(PAGES_DIR, SECTION_CONFIG.music.dir),
+      options: { collection: "music", telegramType: "music", linkType: "deep" },
+    },
+    {
+      key: "books",
+      items: flattenPopularItems(popularBooks, "book"),
+      outputDir: path.join(PAGES_DIR, SECTION_CONFIG.books.dir),
+      options: { collection: "books", telegramType: "book", linkType: "deep" },
+    },
+  ]
+
+  collections.forEach((collection) => {
+    fs.rmSync(collection.outputDir, { recursive: true, force: true })
+    if (!collection.items.length) {
+      return
+    }
+
+    const routesById = createCollectionRouteMap(collection.items, collection.key)
+    collection.items.forEach((item) => {
+      const filePath = collectionPageFilePath(item, collection.key, routesById)
+      fs.mkdirSync(path.dirname(filePath), { recursive: true })
+      fs.writeFileSync(
+        filePath,
+        buildMoviePageHtml(item, routesById, {
+          ...collection.options,
+          items: collection.items,
+        }),
+      )
+    })
   })
 }
 
@@ -545,8 +639,8 @@ function writeLinksList() {
   fs.writeFileSync(LINKS_LIST_PATH, `${sortUrlsBySection(dedupedUrls).join("\n")}`)
 }
 
-const flatPopularMovies = flattenPopularMovies(popularMovies)
-writeMoviePages()
+const flatPopularMovies = flattenPopularItems(popularMovies, "movie")
+writeCollectionPages()
 writeSitemap()
 writeLinksList()
 

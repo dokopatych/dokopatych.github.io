@@ -16,3 +16,11 @@ const popularAudiobooks = [
 		"release_date": "2026-03-15"
 	}
 ]
+
+if (typeof window !== 'undefined') {
+	window.popularAudiobooks = popularAudiobooks;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+	module.exports = { popularAudiobooks };
+}
