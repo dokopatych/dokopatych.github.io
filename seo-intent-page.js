@@ -100,7 +100,6 @@ function renderFaq(config) {
     `<div class="faqCard"><h3>Как работает бот</h3><p>${config.flow}</p></div>`,
     ...listCards,
     `<div class="faqCard"><h3>Навигация</h3><ul>${navLinks.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}</ul></div>`,
-    `<div class="faqCard"><h3>Какие запросы подходят</h3><p>${config.queries}</p></div>`,
     cloudCard,
   ].filter(Boolean)
 
