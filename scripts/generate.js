@@ -458,6 +458,99 @@ function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
 `
 }
 
+function buildSectionIndexConfig(collection, items, routesById) {
+  const section = SECTION_CONFIG[collection]
+  if (!section) {
+    return null
+  }
+
+  const canonical = toAbsoluteUrl(section.href)
+  const collectionLabelLower = section.label.toLowerCase()
+  const h1 = `${section.label} в Telegram-боте`
+
+  return {
+    title: `${section.label} — каталог | Докопатыч`,
+    description: `Подборка: ${collectionLabelLower}. Открывайте карточки и запускайте поиск через Telegram-бота Докопатыч.`,
+    canonical,
+    h1,
+    sectionDescription: `Раздел содержит популярные позиции: ${collectionLabelLower}.`,
+    emptyText: "Список скоро обновится.",
+    items: items.map((item) => ({
+      href: collectionPagePath(item, collection, routesById),
+      label: item.release_date
+        ? `${item.title} (${String(item.release_date).slice(0, 4)})`
+        : item.title,
+    })),
+    navLinks: resolveCollectionNavLinks(),
+  }
+}
+
+function buildSectionIndexPageHtml(collection, items, routesById) {
+  const config = buildSectionIndexConfig(collection, items, routesById)
+  if (!config) {
+    return ""
+  }
+
+  return `<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="${rootAsset("analytics")}"></script>
+    <title>${escapeHtml(config.title)}</title>
+    <meta name="description" content="${escapeHtml(config.description)}" />
+    <meta property="og:title" content="${escapeHtml(config.title)}" />
+    <meta property="og:site_name" content="Докопатыч" />
+    <meta property="og:description" content="${escapeHtml(config.description)}" />
+    <meta property="og:image" content="https://dokopatych.vercel.app/images/square.webp" />
+    <meta property="og:url" content="${escapeHtml(config.canonical)}" />
+    <meta property="og:type" content="website" />
+    <link rel="canonical" href="${escapeHtml(config.canonical)}">
+    <link rel="icon" href="https://dokopatych.vercel.app/images/round-sm.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="https://dokopatych.vercel.app/images/round-sm.ico" />
+    <link rel="stylesheet" href="${rootAsset("styles")}" />
+</head>
+<body>
+    <div class="backGround"></div>
+    <div class='column'>
+        <div class="botCard">
+            <img src="${rootAsset("avatar")}" alt="Аватар" class="avatar" />
+            <span class="name">Докопатыч</span>
+            <span class="username">@DokopatychBot</span>
+            <h1 class="description" data-section-h1>${escapeHtml(config.h1)}</h1>
+        </div>
+        <div class="faq">
+            <div class="faqCard">
+                <p data-section-description>${escapeHtml(config.sectionDescription)}</p>
+            </div>
+            <div class="faqCard">
+                <h3>Карточки раздела</h3>
+                <ul data-section-list></ul>
+            </div>
+            <div class="faqCard">
+                <h3>Навигация</h3>
+                <ul data-section-nav></ul>
+            </div>
+        </div>
+    </div>
+    <script>
+      window.SECTION_INDEX_CONFIG = ${JSON.stringify({
+        title: config.title,
+        description: config.description,
+        canonical: config.canonical,
+        h1: config.h1,
+        sectionDescription: config.sectionDescription,
+        emptyText: config.emptyText,
+        items: config.items,
+        navLinks: config.navLinks,
+      })};
+    </script>
+    <script src="/pages/section-index.js"></script>
+</body>
+</html>
+`
+}
+
 function normalizePopularItem(item, fallbackMediaType) {
   const mediaType = item.media_type || fallbackMediaType || "movie"
   const title = item.title || item.original_title
@@ -537,6 +630,12 @@ function writeCollectionPages() {
     }
 
     const routesById = createCollectionRouteMap(collection.items, collection.key)
+    fs.mkdirSync(collection.outputDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(collection.outputDir, "index.html"),
+      buildSectionIndexPageHtml(collection.key, collection.items, routesById),
+    )
+
     collection.items.forEach((item) => {
       const filePath = collectionPageFilePath(item, collection.key, routesById)
       fs.mkdirSync(path.dirname(filePath), { recursive: true })
