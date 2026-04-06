@@ -179,9 +179,12 @@ a {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
 }
 
 .faqCard {
+    width: 100%;
+    box-sizing: border-box;
     padding: 40px;
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.2);
@@ -231,6 +234,25 @@ a {
 .faqCard ul {
     margin: 0;
     padding-left: 20px;
+}
+
+.faqCard li + li {
+    margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+    .column {
+        min-width: 0;
+        width: 100%;
+        margin: 20px 12px 120px;
+        gap: 36px;
+    }
+
+    .botCard,
+    .faqCard {
+        width: 100%;
+        padding: 24px;
+    }
 }
 
 .neon-tag-cloud {

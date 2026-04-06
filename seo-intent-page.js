@@ -4,6 +4,9 @@ const COMMON_NAV_LINKS = [
   { href: "/pages/audiobooks", label: "Аудиокниги" },
   { href: "/pages/audiobook-search-bot", label: "Поиск аудиокниг" },
   { href: "/pages/film-download-bot", label: "Поиск фильмов и сериалов" },
+  { href: "/pages/chto-posmotret-vecherom", label: "Что посмотреть вечером" },
+  { href: "/pages/neochevidnye-filmy", label: "Неочевидные фильмы" },
+  { href: "/pages/filmy-kak", label: "Фильмы как…" },
   { href: "/pages/game-search-bot", label: "Поиск игр и программ" },
   { href: "/pages/file-search-bot", label: "Поиск файлов и медиа" },
 ]
@@ -42,6 +45,34 @@ function fillMeta(config) {
   set('link[rel="canonical"]', "href", config.url)
 }
 
+function renderListBlock(block) {
+  if (!block || !Array.isArray(block.items) || !block.items.length) {
+    return ""
+  }
+
+  const title = escapeHtml(block.title || "Подборка")
+  const items = block.items
+    .map((item) => {
+      if (typeof item === "string") {
+        return `<li>${escapeHtml(item)}</li>`
+      }
+
+      if (item && item.href && item.label) {
+        return `<li><a href="${item.href}">${escapeHtml(item.label)}</a></li>`
+      }
+
+      return ""
+    })
+    .filter(Boolean)
+    .join("")
+
+  if (!items) {
+    return ""
+  }
+
+  return `<div class="faqCard"><h3>${title}</h3><ul>${items}</ul></div>`
+}
+
 function renderFaq(config) {
   const faq = document.querySelector("[data-faq]")
   if (!faq) return
@@ -59,10 +90,15 @@ function renderFaq(config) {
         .join("")}</div></div>`
     : ""
 
+  const listCards = Array.isArray(config.listBlocks)
+    ? config.listBlocks.map((block) => renderListBlock(block)).filter(Boolean)
+    : []
+
   const cards = [
     `<div class="faqCard"><h2>${config.h2}</h2><p>${config.description}</p></div>`,
     `<div class="faqCard"><h3>Как скачать</h3><p>${config.about}</p></div>`,
     `<div class="faqCard"><h3>Как работает бот</h3><p>${config.flow}</p></div>`,
+    ...listCards,
     `<div class="faqCard"><h3>Навигация</h3><ul>${navLinks.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}</ul></div>`,
     `<div class="faqCard"><h3>Какие запросы подходят</h3><p>${config.queries}</p></div>`,
     cloudCard,

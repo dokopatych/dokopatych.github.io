@@ -48,3 +48,6 @@ https://dokopatych.vercel.app/pages/film-download-bot
 https://dokopatych.vercel.app/pages/game-search-bot
 https://dokopatych.vercel.app/pages/music-search-bot
 https://dokopatych.vercel.app/pages/skachat-albom-artista
+https://dokopatych.vercel.app/pages/chto-posmotret-vecherom
+https://dokopatych.vercel.app/pages/neochevidnye-filmy
+https://dokopatych.vercel.app/pages/filmy-kak
