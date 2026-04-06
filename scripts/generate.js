@@ -24,6 +24,38 @@ const ROOT_ASSETS = {
   movies: "/movies.js",
 }
 
+const SECTION_CONFIG = {
+  movies: {
+    dir: "about-movie",
+    label: "Фильмы и сериалы",
+    href: "/pages/about-movie",
+  },
+  audiobooks: {
+    dir: "audiobooks",
+    label: "Аудиокниги",
+    href: "/pages/audiobooks",
+    telegramType: "aud",
+  },
+  games: {
+    dir: "games",
+    label: "Игры",
+    href: "/pages/games",
+    telegramType: "game",
+  },
+  music: {
+    dir: "music",
+    label: "Музыкальные альбомы",
+    href: "/pages/music",
+    telegramType: "music",
+  },
+  books: {
+    dir: "books",
+    label: "Книги",
+    href: "/pages/books",
+    telegramType: "book",
+  },
+}
+
 const NON_INDEXED_PAGE_PATTERNS = [/^pages\/skachat-film-.*\.html$/]
 const LINK_SECTIONS = [
   { key: "root", prefix: "/" },
@@ -63,6 +95,38 @@ const MEDIA_COPY = {
     headingPlural: "сериалы",
     applicationName: "Докопатыч | Поиск сериалов",
     telegramType: "tv",
+  },
+  aud: {
+    nounAccusative: "аудиокнигу",
+    nounGenitive: "аудиокниги",
+    nounPlural: "аудиокниги",
+    headingPlural: "аудиокниги",
+    applicationName: "Докопатыч | Поиск аудиокниг",
+    telegramType: "aud",
+  },
+  game: {
+    nounAccusative: "игру",
+    nounGenitive: "игры",
+    nounPlural: "игры",
+    headingPlural: "игры",
+    applicationName: "Докопатыч | Поиск игр",
+    telegramType: "game",
+  },
+  music: {
+    nounAccusative: "альбом",
+    nounGenitive: "альбома",
+    nounPlural: "альбомы",
+    headingPlural: "альбомы",
+    applicationName: "Докопатыч | Поиск музыки",
+    telegramType: "music",
+  },
+  book: {
+    nounAccusative: "книгу",
+    nounGenitive: "книги",
+    nounPlural: "книги",
+    headingPlural: "книги",
+    applicationName: "Докопатыч | Поиск книг",
+    telegramType: "book",
   },
 }
 
@@ -113,20 +177,72 @@ function rootAsset(asset) {
 }
 
 function resolveMediaType(mediaType) {
-  return mediaType === "tv" ? "tv" : "movie"
+  const normalized = String(mediaType || "").toLowerCase()
+  if (normalized in MEDIA_COPY) {
+    return normalized
+  }
+
+  return normalized === "tv" ? "tv" : "movie"
 }
 
 function resolveMediaCopy(mediaType) {
   return MEDIA_COPY[resolveMediaType(mediaType)]
 }
 
-function movieDeepLink(movie) {
-  const media = resolveMediaCopy(movie.media_type)
-  return `https://t.me/DokopatychBot?start=searchTr-${movie.id}-${media.telegramType}-lnd`
+function hasHtmlPagesInDir(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    return false
+  }
+
+  return fs.readdirSync(dirPath, { withFileTypes: true }).some((entry) => {
+    const entryPath = path.join(dirPath, entry.name)
+    if (entry.isDirectory()) {
+      return hasHtmlPagesInDir(entryPath)
+    }
+
+    return entry.isFile() && entry.name.endsWith(".html")
+  })
 }
 
-function movieDesktopDeepLink(movie) {
-  const webLink = movieDeepLink(movie)
+function resolveCollectionNavLinks() {
+  const links = [{ href: "/", label: "Главная страница" }]
+  const order = ["audiobooks", "games", "music", "books"]
+
+  order.forEach((key) => {
+    const section = SECTION_CONFIG[key]
+    if (!section) return
+    const sectionDir = path.join(PAGES_DIR, section.dir)
+    if (hasHtmlPagesInDir(sectionDir)) {
+      links.push({ href: section.href, label: section.label })
+    }
+  })
+
+  links.push(
+    { href: "/pages/music-search-bot", label: "Поиск музыки" },
+    { href: "/pages/audiobook-search-bot", label: "Поиск аудиокниг" },
+    { href: "/pages/film-download-bot", label: "Поиск фильмов и сериалов" },
+    { href: "/pages/game-search-bot", label: "Поиск игр и программ" },
+    { href: "/pages/file-search-bot", label: "Поиск файлов и медиа" },
+  )
+
+  return links
+}
+
+function resolveTelegramType(movie, options = {}) {
+  if (options.telegramType) {
+    return options.telegramType
+  }
+
+  const media = resolveMediaCopy(movie.media_type)
+  return media.telegramType
+}
+
+function movieDeepLink(movie, options = {}) {
+  return `https://t.me/DokopatychBot?start=searchTr-${movie.id}-${resolveTelegramType(movie, options)}-lnd`
+}
+
+function movieDesktopDeepLink(movie, options = {}) {
+  const webLink = movieDeepLink(movie, options)
   const payload = webLink.split("?start=")[1] || ""
   return `tg://resolve?domain=DokopatychBot${payload ? `&start=${payload}` : ""}`
 }
@@ -196,11 +312,11 @@ function pickTagCloudQueries(movie, limit = 20) {
   return uniqueNonEmpty([...scored, ...fallback]).slice(0, limit)
 }
 
-function buildIntentConfig(movie, tagCloudQueries, movieRoutesById) {
+function buildIntentConfig(movie, tagCloudQueries, movieRoutesById, options = {}) {
   const quotedTitle = `«${movie.title}»`
   const media = resolveMediaCopy(movie.media_type)
   const queryHighlights = tagCloudQueries.slice(0, 6)
-  const link = movieDeepLink(movie)
+  const link = movieDeepLink(movie, options)
 
   return {
     title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
@@ -218,6 +334,7 @@ function buildIntentConfig(movie, tagCloudQueries, movieRoutesById) {
     applicationName: media.applicationName,
     tagCloudTitle: "С какими запросами обычно приходят к боту",
     tagCloudQueries,
+    navLinks: resolveCollectionNavLinks(),
   }
 }
 
@@ -231,11 +348,12 @@ function mapMovieForIntentLink(movie, movieRoutesById) {
   return { ...movie, id: route.slug }
 }
 
-function buildMoviePageHtml(movie, movieRoutesById) {
+function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
   const config = buildIntentConfig(
     movie,
     pickTagCloudQueries(movie),
     movieRoutesById,
+    options,
   )
   const configJson = JSON.stringify(config)
   const relatedMoviesForIntent = JSON.stringify(
@@ -275,8 +393,8 @@ function buildMoviePageHtml(movie, movieRoutesById) {
             <span class="username">@DokopatychBot</span>
             <h1 class="description" data-h1>${escapeHtml(config.h1)}</h1>
             <div class="btns-container">
-                <a href="${movieDeepLink(movie)}" class="start-btn" target="_blank" rel="noopener">WEB</a>
-                <a href="${movieDesktopDeepLink(movie)}" class="start-btn">DESKTOP</a>
+                <a href="${movieDeepLink(movie, options)}" class="start-btn" target="_blank" rel="noopener">WEB</a>
+                <a href="${movieDesktopDeepLink(movie, options)}" class="start-btn">DESKTOP</a>
             </div>
         </div>
         <div class="faq" data-faq></div>
@@ -301,7 +419,7 @@ function buildMoviePageHtml(movie, movieRoutesById) {
           btns.innerHTML = '';
           var a = document.createElement('a');
           a.className = 'start-btn';
-          a.href = ${JSON.stringify(movieDeepLink(movie))};
+          a.href = ${JSON.stringify(movieDeepLink(movie, options))};
           a.target = '_blank';
           a.rel = 'noopener';
           a.textContent = 'ОТКРЫТЬ В TELEGRAM';

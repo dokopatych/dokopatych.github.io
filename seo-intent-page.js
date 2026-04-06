@@ -1,6 +1,7 @@
 const COMMON_NAV_LINKS = [
   { href: "/", label: "Главная страница" },
   { href: "/pages/music-search-bot", label: "Поиск музыки" },
+  { href: "/pages/audiobooks", label: "Аудиокниги" },
   { href: "/pages/audiobook-search-bot", label: "Поиск аудиокниг" },
   { href: "/pages/film-download-bot", label: "Поиск фильмов и сериалов" },
   { href: "/pages/game-search-bot", label: "Поиск игр и программ" },
@@ -44,6 +45,10 @@ function fillMeta(config) {
 function renderFaq(config) {
   const faq = document.querySelector("[data-faq]")
   if (!faq) return
+  const navLinks =
+    Array.isArray(config.navLinks) && config.navLinks.length
+      ? config.navLinks
+      : COMMON_NAV_LINKS
 
   const cloudItems = Array.isArray(config.tagCloudQueries)
     ? config.tagCloudQueries
@@ -58,7 +63,7 @@ function renderFaq(config) {
     `<div class="faqCard"><h2>${config.h2}</h2><p>${config.description}</p></div>`,
     `<div class="faqCard"><h3>Как скачать</h3><p>${config.about}</p></div>`,
     `<div class="faqCard"><h3>Как работает бот</h3><p>${config.flow}</p></div>`,
-    `<div class="faqCard"><h3>Навигация</h3><ul>${COMMON_NAV_LINKS.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}</ul></div>`,
+    `<div class="faqCard"><h3>Навигация</h3><ul>${navLinks.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}</ul></div>`,
     `<div class="faqCard"><h3>Какие запросы подходят</h3><p>${config.queries}</p></div>`,
     cloudCard,
   ].filter(Boolean)
