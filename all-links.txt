@@ -1,4 +1,5 @@
 https://dokopatych.vercel.app/
+https://dokopatych.vercel.app/pages/about-movie/твое-сердце-будет-разбито
 https://dokopatych.vercel.app/pages/about-movie/avatar-fire-and-ash
 https://dokopatych.vercel.app/pages/about-movie/bones
 https://dokopatych.vercel.app/pages/about-movie/cheers
@@ -38,12 +39,11 @@ https://dokopatych.vercel.app/pages/about-movie/watch-what-happens-live-with-and
 https://dokopatych.vercel.app/pages/about-movie/whistle
 https://dokopatych.vercel.app/pages/about-movie/wuthering-heights
 https://dokopatych.vercel.app/pages/about-movie/zootopia-2
-https://dokopatych.vercel.app/pages/about-movie/твое-сердце-будет-разбито
+https://dokopatych.vercel.app/pages/audiobooks/твое-сердце-будет-разбито
+https://dokopatych.vercel.app/pages/audiobooks/project-hail-mary
 https://dokopatych.vercel.app/pages/audiobook-search-bot
 https://dokopatych.vercel.app/pages/file-search-bot
 https://dokopatych.vercel.app/pages/film-download-bot
 https://dokopatych.vercel.app/pages/game-search-bot
 https://dokopatych.vercel.app/pages/music-search-bot
 https://dokopatych.vercel.app/pages/skachat-albom-artista
-https://dokopatych.vercel.app/pages/skachat-audioknigu-nazvanie
-https://dokopatych.vercel.app/pages/skachat-serial-nazvanie
