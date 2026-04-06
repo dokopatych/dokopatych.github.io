@@ -25,11 +25,17 @@ const ROOT_ASSETS = {
 }
 
 const NON_INDEXED_PAGE_PATTERNS = [/^pages\/skachat-film-.*\.html$/]
+const LINK_SECTIONS = [
+  { key: "root", prefix: "/" },
+  { key: "about-movie", prefix: "/pages/about-movie/" },
+  { key: "audiobooks", prefix: "/pages/audiobooks/" },
+  { key: "pages", prefix: "/pages/" },
+]
 
 const SEO_BASE_PAGES = [
   { loc: `${BASE_URL}/`, changefreq: "daily", priority: "1.0" },
   // { loc: `${BASE_URL}/pages/music-search-bot`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/audiobook-search-bot`, changefreq: 'weekly', priority: '0.9' },
+  { loc: `${BASE_URL}/pages/audiobook-search-bot`, changefreq: "weekly", priority: "0.9" },
   // { loc: `${BASE_URL}/pages/film-download-bot`, changefreq: 'weekly', priority: '0.9' },
   // { loc: `${BASE_URL}/pages/game-search-bot`, changefreq: 'weekly', priority: '0.9' },
   // { loc: `${BASE_URL}/pages/file-search-bot`, changefreq: 'weekly', priority: '0.9' },
@@ -132,13 +138,41 @@ function tokenize(value) {
     .filter((token) => token.length >= 3 && !QUERY_STOP_WORDS.has(token))
 }
 
+function uniqueNonEmpty(values) {
+  return [
+    ...new Set(
+      values
+        .map((value) => String(value || "").replace(/\s+/g, " ").trim())
+        .filter(Boolean),
+    ),
+  ]
+}
+
+function buildFallbackTagCloudQueries(movie, limit = 20) {
+  const media = resolveMediaCopy(movie.media_type)
+  const title = movie.title
+  const releaseYear = String(movie.release_date || "").slice(0, 4)
+  const base = [
+    `скачать ${media.nounAccusative} ${title}`,
+    `${title} торрент`,
+    `${title} скачать через telegram`,
+    `${title} в хорошем качестве`,
+    `${title} смотреть онлайн`,
+    `${title} ${media.nounGenitive} скачать`,
+    `${title} ${media.nounPlural}`,
+    releaseYear ? `${title} ${releaseYear}` : "",
+  ]
+
+  return uniqueNonEmpty(base).slice(0, limit)
+}
+
 function pickTagCloudQueries(movie, limit = 20) {
   const source =
     resolveMediaType(movie.media_type) === "tv" ? tvQueries : movieQueries
   const titleTokens = tokenize(movie.title)
 
   if (!titleTokens.length) {
-    return source.slice(0, limit)
+    return buildFallbackTagCloudQueries(movie, limit)
   }
 
   const scored = source
@@ -155,11 +189,11 @@ function pickTagCloudQueries(movie, limit = 20) {
     .map((item) => item.query)
 
   if (scored.length >= limit) {
-    return scored.slice(0, limit)
+    return uniqueNonEmpty(scored).slice(0, limit)
   }
 
-  const merged = [...scored, ...source]
-  return [...new Set(merged)].slice(0, limit)
+  const fallback = buildFallbackTagCloudQueries(movie, limit)
+  return uniqueNonEmpty([...scored, ...fallback]).slice(0, limit)
 }
 
 function buildIntentConfig(movie, tagCloudQueries, movieRoutesById) {
@@ -332,6 +366,26 @@ function readAllHtmlPages(dir = PAGES_DIR) {
   })
 }
 
+function getUrlSectionOrder(url) {
+  const pathname = new URL(url).pathname
+  const index = LINK_SECTIONS.findIndex(({ prefix }) =>
+    prefix === "/" ? pathname === "/" : pathname.startsWith(prefix),
+  )
+
+  return index === -1 ? LINK_SECTIONS.length : index
+}
+
+function sortUrlsBySection(urls) {
+  return [...urls].sort((a, b) => {
+    const sectionDiff = getUrlSectionOrder(a) - getUrlSectionOrder(b)
+    if (sectionDiff !== 0) {
+      return sectionDiff
+    }
+
+    return a.localeCompare(b, "ru")
+  })
+}
+
 function buildSitemapEntry({ loc, changefreq, priority }) {
   return `  <url><loc>${loc}</loc><lastmod>${TODAY}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
 }
@@ -364,7 +418,7 @@ function writeLinksList() {
   const pageUrls = readAllHtmlPages()
   const allUrls = [`${BASE_URL}/`, ...pageUrls]
   const dedupedUrls = [...new Set(allUrls)]
-  fs.writeFileSync(LINKS_LIST_PATH, `${dedupedUrls.join("\n")}`)
+  fs.writeFileSync(LINKS_LIST_PATH, `${sortUrlsBySection(dedupedUrls).join("\n")}`)
 }
 
 const flatPopularMovies = flattenPopularMovies(popularMovies)
