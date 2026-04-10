@@ -96,8 +96,8 @@ function renderFaq(config) {
 
   const cards = [
     `<div class="faqCard"><h2>${config.h2}</h2><p>${config.description}</p></div>`,
-    `<div class="faqCard"><h3>Как скачать</h3><p>${config.about}</p></div>`,
-    `<div class="faqCard"><h3>Как работает бот</h3><p>${config.flow}</p></div>`,
+    `<div class="faqCard"><h3>Как открыть в Telegram и скачать</h3><p>${config.about}</p></div>`,
+    `<div class="faqCard"><h3>Что будет дальше</h3><p>${config.flow}</p></div>`,
     ...listCards,
     `<div class="faqCard"><h3>Навигация</h3><ul>${navLinks.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}</ul></div>`,
     cloudCard,
@@ -107,27 +107,46 @@ function renderFaq(config) {
 }
 
 function renderJsonLd(config) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: `Что значит запрос «${config.queryExample}»?`,
-        acceptedAnswer: { "@type": "Answer", text: config.about },
-      },
-      {
-        "@type": "Question",
-        name: "Что можно искать?",
-        acceptedAnswer: { "@type": "Answer", text: config.queries },
-      },
-      {
-        "@type": "Question",
-        name: "Как выдаются результаты?",
-        acceptedAnswer: { "@type": "Answer", text: config.flow },
-      },
-    ],
+  const graph = []
+
+  graph.push({
+    "@type": "WebPage",
+    "@id": config.url,
+    url: config.url,
+    name: config.title,
+    description: config.description,
+    inLanguage: "ru",
+  })
+
+  if (Array.isArray(config.breadcrumbs) && config.breadcrumbs.length >= 2) {
+    graph.push({
+      "@type": "BreadcrumbList",
+      itemListElement: config.breadcrumbs
+        .filter((item) => item && item.name && item.url)
+        .map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.name,
+          item: item.url,
+        })),
+    })
   }
+
+  const faqItems = Array.isArray(config.faq) ? config.faq : []
+  if (faqItems.length) {
+    graph.push({
+      "@type": "FAQPage",
+      mainEntity: faqItems
+        .filter((item) => item && item.q && item.a)
+        .map((item) => ({
+          "@type": "Question",
+          name: String(item.q),
+          acceptedAnswer: { "@type": "Answer", text: String(item.a) },
+        })),
+    })
+  }
+
+  const jsonLd = { "@context": "https://schema.org", "@graph": graph }
 
   const el = document.querySelector("[data-jsonld]")
   if (el) el.textContent = JSON.stringify(jsonLd)
@@ -196,7 +215,7 @@ function initIntentPage(config) {
 
   const h1 = document.querySelector("[data-h1]")
   if (h1) {
-    h1.innerHTML = `${config.h1}<br /><br />Бот для поиска файлов и медиа в Telegram`
+    h1.textContent = config.h1
   }
 }
 

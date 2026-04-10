@@ -351,29 +351,68 @@ function buildIntentConfig(movie, tagCloudQueries, movieRoutesById, options = {}
   const h2Label = h2LabelByType[mediaType] || media.nounAccusative
   const h2 = `${h2Label} ${quotedTitle}`
   const overview = String(movie.overview || "").replace(/\s+/g, " ").trim()
+  const fallbackDescriptionByType = {
+    movie: `Короткая страница про фильм ${quotedTitle}: здесь можно быстро перейти к поиску в Telegram и открыть варианты по названию.`,
+    tv: `Короткая страница про сериал ${quotedTitle}: переход к поиску в Telegram уже подготовлен — удобно, если ищете по названию или сезону.`,
+    aud: `Страница про аудиокнигу ${quotedTitle}: быстрый переход к поиску в Telegram, чтобы найти издание, чтеца или серию.`,
+    music: `Страница про альбом ${quotedTitle}: быстрый переход к поиску в Telegram, чтобы найти треки и варианты по исполнителю.`,
+    game: `Страница про игру ${quotedTitle}: быстрый переход к поиску в Telegram — можно искать по названию и платформе.`,
+    book: `Страница про книгу ${quotedTitle}: быстрый переход к поиску в Telegram, чтобы найти нужное издание по названию и автору.`,
+  }
   const description =
     overview.length >= 80
       ? overview
-      : `Где найти ${media.nounAccusative} ${quotedTitle}: откройте Telegram‑бота Докопатыч — запрос уже подготовлен, остаётся выбрать вариант.`
+      : fallbackDescriptionByType[mediaType] ||
+        `Где найти ${media.nounAccusative} ${quotedTitle}: откройте Telegram‑бота Докопатыч — запрос уже подготовлен, остаётся выбрать вариант.`
+  const section =
+    SECTION_CONFIG[options.collection || "movies"] || SECTION_CONFIG.movies
+  const canonicalUrl = toAbsoluteUrl(
+    collectionPagePath(movie, options.collection || "movies", movieRoutesById),
+  )
+  const breadcrumbs = [
+    { name: "Докопатыч", url: toAbsoluteUrl("/") },
+    { name: section.label, url: toAbsoluteUrl(section.href) },
+    { name: movie.title, url: canonicalUrl },
+  ]
+  const aboutText = `Откройте ${media.nounAccusative} ${quotedTitle} через Telegram‑бота — он стартует сразу с нужным запросом.`
+  const flowText =
+    "Нажмите кнопку — откроется Telegram‑бот, и запрос уже будет заполнен. Это экономит время и помогает быстрее найти нужное."
 
   return {
     title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
-    url: toAbsoluteUrl(
-      collectionPagePath(movie, options.collection || "movies", movieRoutesById),
-    ),
+    url: canonicalUrl,
     h1: `Скачать ${media.nounAccusative} ${quotedTitle}`,
     h2,
     description,
     queryExample: `скачать ${media.nounAccusative} ${movie.title}`,
     about: `<a href="${link}">Открыть ${media.nounAccusative} ${quotedTitle}</a> можно через Telegram‑бота: он запускается сразу с нужным запросом.`,
+    aboutText,
     queries: queryHighlights.length
       ? `Часто ищут так: ${queryHighlights.join(", ")}.`
       : `Часто ищут так: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
-    flow: `Нажмите кнопку — откроется Telegram‑бот, и запрос уже будет заполнен. Это экономит время и помогает быстрее найти нужное.`,
+    flow: flowText,
+    flowText,
     popularTitle: `Другие ${media.headingPlural}`,
     applicationName: media.applicationName,
     tagCloudTitle: "Популярные поисковые запросы по теме",
     tagCloudQueries,
+    breadcrumbs,
+    faq: [
+      {
+        q: `Как открыть ${media.nounAccusative} ${quotedTitle}?`,
+        a: aboutText,
+      },
+      {
+        q: "Нужно ли что-то вводить вручную?",
+        a: "При переходе со страницы файла – нет. Запрос подставляется автоматически — обычно достаточно открыть бота и выбрать результат. Далее можно отправлять ему что угодно, он поищет.",
+      },
+      {
+        q: "Какие запросы чаще всего используют?",
+        a: queryHighlights.length
+          ? `Например: ${queryHighlights.join(", ")}.`
+          : `Например: скачать ${media.nounAccusative} ${movie.title}.`,
+      },
+    ],
     navLinks: resolveCollectionNavLinks(),
   }
 }
@@ -488,13 +527,28 @@ function buildSectionIndexConfig(collection, items, routesById) {
   const canonical = toAbsoluteUrl(section.href)
   const collectionLabelLower = section.label.toLowerCase()
   const h1 = `${section.label} в Telegram-боте`
+  const introByCollection = {
+    movies:
+      "Подборка фильмов и сериалов, которые чаще всего ищут. У каждой позиции есть отдельная страница с быстрым переходом к поиску в Telegram.",
+    audiobooks:
+      "Каталог аудиокниг: выбирайте название — дальше можно быстро перейти к поиску в Telegram (удобно для серии, автора и разных озвучек).",
+    music:
+      "Каталог музыкальных альбомов: откройте нужный релиз и переходите к поиску в Telegram по исполнителю и названию.",
+    games:
+      "Каталог игр: выберите тайтл и перейдите к поиску в Telegram — удобно, если ищете по названию и платформе.",
+    books:
+      "Каталог книг: выберите произведение и перейдите к поиску в Telegram по названию и автору.",
+  }
+  const sectionDescription =
+    introByCollection[collection] ||
+    `Здесь собраны популярные ${collectionLabelLower}. Выберите нужное — и перейдите к поиску в боте.`
 
   return {
     title: `${section.label} — каталог | Докопатыч`,
     description: `Каталог: ${collectionLabelLower}. Выберите позицию из списка — откроется страница с быстрым переходом в Telegram‑бота Докопатыч.`,
     canonical,
     h1,
-    sectionDescription: `Здесь собраны популярные ${collectionLabelLower}. Выберите нужное — и перейдите к поиску в боте.`,
+    sectionDescription,
     listTitle: `Популярные ${collectionLabelLower}`,
     emptyText: "Список скоро обновится.",
     items: items.map((item) => ({
@@ -531,6 +585,7 @@ function buildSectionIndexPageHtml(collection, items, routesById) {
     <link rel="icon" href="https://dokopatych.vercel.app/images/round-sm.ico" type="image/x-icon">
     <link rel="shortcut icon" href="https://dokopatych.vercel.app/images/round-sm.ico" />
     <link rel="stylesheet" href="${rootAsset("styles")}" />
+    <script type="application/ld+json" data-jsonld></script>
 </head>
 <body>
     <div class="backGround"></div>
