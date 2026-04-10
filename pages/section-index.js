@@ -61,8 +61,8 @@
     }
 
     const description = document.querySelector('[data-section-description]')
-    if (description && config.description) {
-      description.textContent = config.description
+    if (description && (config.sectionDescription || config.description)) {
+      description.textContent = config.sectionDescription || config.description
     }
 
     renderItems(config)

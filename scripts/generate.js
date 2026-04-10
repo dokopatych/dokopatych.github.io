@@ -71,17 +71,6 @@ const LINK_SECTIONS = [
 
 const SEO_BASE_PAGES = [
   { loc: `${BASE_URL}/`, changefreq: "daily", priority: "1.0" },
-  // { loc: `${BASE_URL}/pages/music-search-bot`, changefreq: 'weekly', priority: '0.9' },
-  { loc: `${BASE_URL}/pages/audiobook-search-bot`, changefreq: "weekly", priority: "0.9" },
-  // { loc: `${BASE_URL}/pages/film-download-bot`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/chto-posmotret-vecherom`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/neochevidnye-filmy`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/filmy-kak`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/game-search-bot`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/file-search-bot`, changefreq: 'weekly', priority: '0.9' },
-  // { loc: `${BASE_URL}/pages/skachat-albom-artista`, changefreq: 'weekly', priority: '0.8' },
-  // { loc: `${BASE_URL}/pages/skachat-audioknigu-nazvanie`, changefreq: 'weekly', priority: '0.8' },
-  // { loc: `${BASE_URL}/pages/skachat-serial-nazvanie`, changefreq: 'weekly', priority: '0.8' },
 ]
 const SEO_BASE_PAGES_BY_LOC = new Map(
   SEO_BASE_PAGES.map((page) => [page.loc, page]),
@@ -218,6 +207,20 @@ function hasHtmlPagesInDir(dirPath) {
   })
 }
 
+function hrefToOutputFilePath(href) {
+  const normalizedHref = normalizePagePath(href)
+  const relative = normalizedHref.replace(/^\//, "")
+  if (relative.toLowerCase().endsWith(".html")) {
+    return path.join(ROOT, relative)
+  }
+
+  return path.join(ROOT, relative, "index.html")
+}
+
+function hasGeneratedPage(href) {
+  return fs.existsSync(hrefToOutputFilePath(href))
+}
+
 function resolveCollectionNavLinks() {
   const links = [{ href: "/", label: "Главная страница" }]
   const order = ["audiobooks", "games", "music", "books"]
@@ -231,16 +234,18 @@ function resolveCollectionNavLinks() {
     }
   })
 
-  links.push(
-    { href: "/pages/music-search-bot", label: "Поиск музыки" },
-    { href: "/pages/audiobook-search-bot", label: "Поиск аудиокниг" },
-    { href: "/pages/film-download-bot", label: "Поиск фильмов и сериалов" },
-    { href: "/pages/chto-posmotret-vecherom", label: "Что посмотреть вечером" },
-    { href: "/pages/neochevidnye-filmy", label: "Неочевидные фильмы" },
-    { href: "/pages/filmy-kak", label: "Фильмы как…" },
-    { href: "/pages/game-search-bot", label: "Поиск игр и программ" },
-    { href: "/pages/file-search-bot", label: "Поиск файлов и медиа" },
-  )
+  const extraLinks = [
+    { href: "/pages/music-search-bot.html", label: "Поиск музыки" },
+    { href: "/pages/audiobook-search-bot.html", label: "Поиск аудиокниг" },
+    { href: "/pages/film-download-bot.html", label: "Поиск фильмов и сериалов" },
+    { href: "/pages/chto-posmotret-vecherom.html", label: "Что посмотреть вечером" },
+    { href: "/pages/neochevidnye-filmy.html", label: "Неочевидные фильмы" },
+    { href: "/pages/filmy-kak.html", label: "Фильмы как…" },
+    { href: "/pages/game-search-bot.html", label: "Поиск игр и программ" },
+    { href: "/pages/file-search-bot.html", label: "Поиск файлов и медиа" },
+  ].filter((item) => hasGeneratedPage(item.href))
+
+  links.push(...extraLinks)
 
   return links
 }
@@ -334,6 +339,22 @@ function buildIntentConfig(movie, tagCloudQueries, movieRoutesById, options = {}
   const media = resolveMediaCopy(movie.media_type)
   const queryHighlights = tagCloudQueries.slice(0, 6)
   const link = movieDeepLink(movie, options)
+  const mediaType = resolveMediaType(movie.media_type)
+  const h2LabelByType = {
+    movie: "Фильм",
+    tv: "Сериал",
+    aud: "Аудиокнига",
+    game: "Игра",
+    music: "Альбом",
+    book: "Книга",
+  }
+  const h2Label = h2LabelByType[mediaType] || media.nounAccusative
+  const h2 = `${h2Label} ${quotedTitle}`
+  const overview = String(movie.overview || "").replace(/\s+/g, " ").trim()
+  const description =
+    overview.length >= 80
+      ? overview
+      : `Где найти ${media.nounAccusative} ${quotedTitle}: откройте Telegram‑бота Докопатыч — запрос уже подготовлен, остаётся выбрать вариант.`
 
   return {
     title: `Скачать ${media.nounAccusative} ${quotedTitle} — через Telegram-бота | Докопатыч`,
@@ -341,17 +362,17 @@ function buildIntentConfig(movie, tagCloudQueries, movieRoutesById, options = {}
       collectionPagePath(movie, options.collection || "movies", movieRoutesById),
     ),
     h1: `Скачать ${media.nounAccusative} ${quotedTitle}`,
-    h2: `${media.nounAccusative} ${quotedTitle}`,
-    description: `${movie.overview}`,
+    h2,
+    description,
     queryExample: `скачать ${media.nounAccusative} ${movie.title}`,
-    about: `<a href="${link}">Скачать ${media.nounAccusative} ${quotedTitle}</a> нужно через Telegram-бота, он выдаст торрент файл`,
+    about: `<a href="${link}">Открыть ${media.nounAccusative} ${quotedTitle}</a> можно через Telegram‑бота: он запускается сразу с нужным запросом.`,
     queries: queryHighlights.length
-      ? `Подходят запросы: ${queryHighlights.join(", ")}.`
-      : `Подходят запросы: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} торрент, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
-    flow: `Страница ведёт в Telegram-бота, где заранее подставлен ID ${media.nounGenitive}. Это сокращает путь от запроса до релевантной выдачи.`,
-    popularTitle: `Популярные ${media.headingPlural} недели`,
+      ? `Часто ищут так: ${queryHighlights.join(", ")}.`
+      : `Часто ищут так: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
+    flow: `Нажмите кнопку — откроется Telegram‑бот, и запрос уже будет заполнен. Это экономит время и помогает быстрее найти нужное.`,
+    popularTitle: `Другие ${media.headingPlural}`,
     applicationName: media.applicationName,
-    tagCloudTitle: "С какими запросами обычно приходят к боту",
+    tagCloudTitle: "Популярные поисковые запросы по теме",
     tagCloudQueries,
     navLinks: resolveCollectionNavLinks(),
   }
@@ -470,10 +491,11 @@ function buildSectionIndexConfig(collection, items, routesById) {
 
   return {
     title: `${section.label} — каталог | Докопатыч`,
-    description: `Подборка: ${collectionLabelLower}. Открывайте карточки и запускайте поиск через Telegram-бота Докопатыч.`,
+    description: `Каталог: ${collectionLabelLower}. Выберите позицию из списка — откроется страница с быстрым переходом в Telegram‑бота Докопатыч.`,
     canonical,
     h1,
-    sectionDescription: `Раздел содержит популярные позиции: ${collectionLabelLower}.`,
+    sectionDescription: `Здесь собраны популярные ${collectionLabelLower}. Выберите нужное — и перейдите к поиску в боте.`,
+    listTitle: `Популярные ${collectionLabelLower}`,
     emptyText: "Список скоро обновится.",
     items: items.map((item) => ({
       href: collectionPagePath(item, collection, routesById),
@@ -524,7 +546,7 @@ function buildSectionIndexPageHtml(collection, items, routesById) {
                 <p data-section-description>${escapeHtml(config.sectionDescription)}</p>
             </div>
             <div class="faqCard">
-                <h3>Карточки раздела</h3>
+                <h3>${escapeHtml(config.listTitle || "Популярное")}</h3>
                 <ul data-section-list></ul>
             </div>
             <div class="faqCard">
@@ -540,6 +562,7 @@ function buildSectionIndexPageHtml(collection, items, routesById) {
         canonical: config.canonical,
         h1: config.h1,
         sectionDescription: config.sectionDescription,
+        listTitle: config.listTitle,
         emptyText: config.emptyText,
         items: config.items,
         navLinks: config.navLinks,

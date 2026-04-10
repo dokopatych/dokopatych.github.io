@@ -9,7 +9,6 @@
   function normalizePagePath(urlPath) {
     return String(urlPath || "")
       .replace(/\/index\.html$/i, "")
-      .replace(/\.html$/i, "")
   }
 
   function slugifyMovieTitle(value) {
