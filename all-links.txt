@@ -5,6 +5,7 @@ https://dokopatych.vercel.app/pages/about-movie/bones
 https://dokopatych.vercel.app/pages/about-movie/cheers
 https://dokopatych.vercel.app/pages/about-movie/crime-101
 https://dokopatych.vercel.app/pages/about-movie/csi-crime-scene-investigation
+https://dokopatych.vercel.app/pages/about-movie/dune-part-three
 https://dokopatych.vercel.app/pages/about-movie/eastenders
 https://dokopatych.vercel.app/pages/about-movie/family-guy
 https://dokopatych.vercel.app/pages/about-movie/frasier
@@ -40,6 +41,7 @@ https://dokopatych.vercel.app/pages/about-movie/whistle
 https://dokopatych.vercel.app/pages/about-movie/wuthering-heights
 https://dokopatych.vercel.app/pages/about-movie/zootopia-2
 https://dokopatych.vercel.app/pages/audiobooks/твое-сердце-будет-разбито
+https://dokopatych.vercel.app/pages/audiobooks/dune-part-three-dune-messiah
 https://dokopatych.vercel.app/pages/audiobooks/project-hail-mary
 https://dokopatych.vercel.app/pages/about-movie
 https://dokopatych.vercel.app/pages/audiobook-search-bot

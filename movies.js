@@ -1,5 +1,13 @@
 const popularMovies = [
 	{
+		"id": 1170608,
+		"original_title": "Dune: Part Three",
+		"title": "Дюна: Часть третья",
+		"overview": "Прошло 12 лет после того, как Пол Атрид занял престол императора. Он узнаёт о существовании заговора, но не спешит его разоблачить.",
+		"media_type": "movie",
+		"release_date": "2026-12-18"
+	},
+	{
 		"id": 875828,
 		"original_title": "Peaky Blinders: The Immortal Man",
 		"title": "Острые козырьки: бессмертный",
