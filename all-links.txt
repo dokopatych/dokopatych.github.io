@@ -35,6 +35,7 @@ https://dokopatych.vercel.app/pages/about-movie/return-to-silent-hill
 https://dokopatych.vercel.app/pages/about-movie/scream-7
 https://dokopatych.vercel.app/pages/about-movie/send-help
 https://dokopatych.vercel.app/pages/about-movie/shelter
+https://dokopatych.vercel.app/pages/about-movie/silo
 https://dokopatych.vercel.app/pages/about-movie/supergirl
 https://dokopatych.vercel.app/pages/about-movie/supernatural
 https://dokopatych.vercel.app/pages/about-movie/the-mandalorian-and-grogu
