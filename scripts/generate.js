@@ -891,6 +891,42 @@ function buildSectionIndexPageHtml(collection, items, routesById) {
 `
 }
 
+// ---------- Quality filter ----------
+// Ток-шоу и записи без внятного русского описания не должны становиться
+// страницами, даже если бот снова добавит их в movies.js через /addPop.
+
+const JUNK_MEDIA_IDS = new Set([
+  "22980", // Watch What Happens Live with Andy Cohen
+  "82873", // Шоу Келли Кларксон
+  "33847", // The Talk
+  "270462", // La Revuelta
+])
+
+function hasUsableRussianOverview(item) {
+  const overview = String(item.overview || "").replace(/\s+/g, " ").trim()
+  if (!overview) return false
+  const cyrillic = (overview.match(/[\u0400-\u04FF]/g) || []).length
+  const latin = (overview.match(/[A-Za-z]/g) || []).length
+  if (cyrillic === 0) return false
+  if (latin > 0 && cyrillic / (cyrillic + latin) < 0.5) return false
+  return true
+}
+
+function isJunkItem(item) {
+  if (JUNK_MEDIA_IDS.has(String(item.id))) {
+    return true
+  }
+
+  const mediaType = String(item.media_type || "").toLowerCase()
+  // У музыки описание может быть технической строкой (релизер, битрейт),
+  // поэтому проверку русского текста применяем только к фильмам и сериалам.
+  if (mediaType === "movie" || mediaType === "tv") {
+    return !hasUsableRussianOverview(item)
+  }
+
+  return false
+}
+
 function normalizePopularItem(item, fallbackMediaType) {
   const mediaType = item.media_type || fallbackMediaType || "movie"
   const title = item.title || item.original_title
@@ -902,11 +938,21 @@ function normalizePopularItem(item, fallbackMediaType) {
 }
 
 function flattenPopularItems(source, fallbackMediaType) {
+  const seenIds = new Set()
   return source
     .flat(Infinity)
     .filter((item) => item && typeof item === "object" && item.id)
     .map((item) => normalizePopularItem(item, fallbackMediaType))
     .filter((item) => item.title)
+    .filter((item) => !isJunkItem(item))
+    .filter((item) => {
+      const key = String(item.id)
+      if (seenIds.has(key)) {
+        return false
+      }
+      seenIds.add(key)
+      return true
+    })
 }
 
 function createCollectionRouteMap(items, collection) {
