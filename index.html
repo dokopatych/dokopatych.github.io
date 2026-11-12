@@ -34,8 +34,12 @@
       property="og:image"
       content="https://dokopatych.vercel.app/images/square.webp"
     />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="1024" />
+    <meta property="og:locale" content="ru_RU" />
     <meta property="og:url" content="https://dokopatych.vercel.app/" />
     <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="canonical" href="https://dokopatych.vercel.app/" />
 
@@ -58,24 +62,92 @@
     />
     <script type="application/ld+json">
       {
-        "@context": "http://schema.org/",
-        "@type": "Service",
-        "name": "Поиск музыки, фильмов, игр и файлов в Telegram",
-        "provider": {
-          "@type": "Organization",
-          "name": "Dokopatych",
-          "url": "https://dokopatych.vercel.app/"
-        },
-        "audience": {
-          "@type": "Audience",
-          "audienceType": "Пользователи Telegram"
-        },
-        "serviceType": "Поиск контента и файлов",
-        "offers": {
-          "@type": "Offer",
-          "price": "Free",
-          "priceCurrency": "RUB"
-        }
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://dokopatych.vercel.app/#website",
+            "url": "https://dokopatych.vercel.app/",
+            "name": "Докопатыч",
+            "inLanguage": "ru",
+            "description": "Телеграм-бот для поиска музыки, аудиокниг, фильмов, сериалов, игр и других файлов.",
+            "publisher": { "@id": "https://dokopatych.vercel.app/#organization" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://dokopatych.vercel.app/#organization",
+            "name": "Докопатыч",
+            "url": "https://dokopatych.vercel.app/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://dokopatych.vercel.app/images/square.webp",
+              "width": 1024,
+              "height": 1024
+            }
+          },
+          {
+            "@type": "Service",
+            "@id": "https://dokopatych.vercel.app/#service",
+            "name": "Поиск музыки, фильмов, игр и файлов в Telegram",
+            "provider": { "@id": "https://dokopatych.vercel.app/#organization" },
+            "audience": {
+              "@type": "Audience",
+              "audienceType": "Пользователи Telegram"
+            },
+            "serviceType": "Поиск контента и файлов",
+            "offers": {
+              "@type": "Offer",
+              "price": "Free",
+              "priceCurrency": "RUB"
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://dokopatych.vercel.app/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Что делает бот Докопатыч?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Ты присылаешь мне фильм или сериал, а я собираю тебе несколько списков с чем-то, что может тебе тоже понравиться. Часто попадаются малоизвестные фильмы и сериалы, которые смотрели полтора человека на планете, но они хороши."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Как бот подбирает рекомендации?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "У меня мега хитрый алгоритм. Картины могут быть не связаны темами или жанрами, здесь связь более глубокая. Рекомендации часто неожиданные. Если тебе интересны просто темы космоса или пиратов, то лучше обратиться к гуглу или gpt. Но если ты ищешь что-то, что вовлечёт тебя как тогда, то здесь ко мне."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Как выбирать среди рекомендаций?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Рекомендую ориентироваться только на название и обложку, выбирай сердечком."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Кто такой Джефф Баена?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Это малоизвестный инди-сценарист и режиссёр, он упоминается в описании бота. Автору бота хотелось бы, чтобы такие как Джефф получали больше внимания при жизни, не смотря на низкую распиаренность."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Откуда столько фильмов?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Источник сырых данных для алгоритма: TMDB. Он самый запаристый, самый наполненный и актуальный, есть вообще всё. Не стесняйся искать что угодно."
+                }
+              }
+            ]
+          }
+        ]
       }
     </script>
   </head>
@@ -207,17 +279,17 @@
               >
             </li>
             <li>
-              <a href="/pages/chto-posmotret-vecherom" id="category-4"
+              <a href="/pages/chto-posmotret-vecherom.html" id="category-4"
                 >Что посмотреть вечером</a
               >
             </li>
             <li>
-              <a href="/pages/neochevidnye-filmy" id="category-5"
+              <a href="/pages/neochevidnye-filmy.html" id="category-5"
                 >Неочевидные фильмы и сериалы</a
               >
             </li>
             <li>
-              <a href="/pages/filmy-kak" id="category-6"
+              <a href="/pages/filmy-kak.html" id="category-6"
                 >Фильмы как… (подбор по вайбу)</a
               >
             </li>
@@ -229,6 +301,11 @@
             <li>
               <a href="/pages/file-search-bot.html" id="category-8"
                 >Поиск любых файлов без авторизации</a
+              >
+            </li>
+            <li>
+              <a href="/pages/all-movies.html" id="category-9"
+                >Все фильмы и сериалы: карточки</a
               >
             </li>
           </ul>

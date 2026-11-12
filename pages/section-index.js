@@ -25,6 +25,10 @@
   }
 
   function renderJsonLd(config) {
+    const el = document.querySelector('[data-jsonld]')
+    // JSON-LD is prerendered at build time; keep it intact for crawlers.
+    if (!el || el.textContent.trim()) return
+
     const graph = []
 
     graph.push({
@@ -65,13 +69,13 @@
       })
     }
 
-    const el = document.querySelector('[data-jsonld]')
-    if (el) el.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })
+    el.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })
   }
 
   function renderItems(config) {
     const list = document.querySelector('[data-section-list]')
-    if (!list) return
+    // Lists are prerendered at build time; skip when already filled.
+    if (!list || list.children.length) return
 
     const items = Array.isArray(config.items) ? config.items : []
     if (!items.length) {
@@ -86,7 +90,7 @@
 
   function renderNav(config) {
     const nav = document.querySelector('[data-section-nav]')
-    if (!nav) return
+    if (!nav || nav.children.length) return
 
     const links = Array.isArray(config.navLinks) ? config.navLinks : []
     nav.innerHTML = links

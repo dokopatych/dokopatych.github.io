@@ -1,14 +1,15 @@
 const COMMON_NAV_LINKS = [
   { href: "/", label: "Главная страница" },
-  { href: "/pages/music-search-bot", label: "Поиск музыки" },
+  { href: "/pages/all-movies.html", label: "Все фильмы и сериалы" },
+  { href: "/pages/music-search-bot.html", label: "Поиск музыки" },
   { href: "/pages/audiobooks", label: "Аудиокниги" },
-  { href: "/pages/audiobook-search-bot", label: "Поиск аудиокниг" },
-  { href: "/pages/film-download-bot", label: "Поиск фильмов и сериалов" },
-  { href: "/pages/chto-posmotret-vecherom", label: "Что посмотреть вечером" },
-  { href: "/pages/neochevidnye-filmy", label: "Неочевидные фильмы" },
-  { href: "/pages/filmy-kak", label: "Фильмы как…" },
-  { href: "/pages/game-search-bot", label: "Поиск игр и программ" },
-  { href: "/pages/file-search-bot", label: "Поиск файлов и медиа" },
+  { href: "/pages/audiobook-search-bot.html", label: "Поиск аудиокниг" },
+  { href: "/pages/film-download-bot.html", label: "Поиск фильмов и сериалов" },
+  { href: "/pages/chto-posmotret-vecherom.html", label: "Что посмотреть вечером" },
+  { href: "/pages/neochevidnye-filmy.html", label: "Неочевидные фильмы" },
+  { href: "/pages/filmy-kak.html", label: "Фильмы как…" },
+  { href: "/pages/game-search-bot.html", label: "Поиск игр и программ" },
+  { href: "/pages/file-search-bot.html", label: "Поиск файлов и медиа" },
 ]
 
 const TELEGRAM_MOVIE_SEARCH_PREFIX =
@@ -73,9 +74,32 @@ function renderListBlock(block) {
   return `<div class="faqCard"><h3>${title}</h3><ul>${items}</ul></div>`
 }
 
+const MOBILE_UA_PATTERN =
+  /iphone|ipad|ipod|android|blackberry|opera mini|iemobile|mobile/i
+
+function isMobileDevice() {
+  return (
+    MOBILE_UA_PATTERN.test((navigator.userAgent || "").toLowerCase()) ||
+    (window.matchMedia && window.matchMedia("(max-width: 768px)").matches)
+  )
+}
+
+function buildTelegramButtons(config) {
+  if (!config.webLink || !config.desktopLink) {
+    return ""
+  }
+
+  if (isMobileDevice()) {
+    return `<div class="btns-container"><a href="${escapeHtml(config.webLink)}" class="start-btn" target="_blank" rel="noopener">ОТКРЫТЬ В TELEGRAM</a></div>`
+  }
+
+  return `<div class="btns-container"><a href="${escapeHtml(config.webLink)}" class="start-btn" target="_blank" rel="noopener">WEB</a><a href="${escapeHtml(config.desktopLink)}" class="start-btn">DESKTOP</a></div>`
+}
+
 function renderFaq(config) {
   const faq = document.querySelector("[data-faq]")
-  if (!faq) return
+  // Content is prerendered at build time for crawlers; only fill in when empty.
+  if (!faq || faq.children.length) return
   const navLinks =
     Array.isArray(config.navLinks) && config.navLinks.length
       ? config.navLinks
@@ -96,8 +120,7 @@ function renderFaq(config) {
 
   const cards = [
     `<div class="faqCard"><h2>${config.h2}</h2><p>${config.description}</p></div>`,
-    `<div class="faqCard"><h3>Как открыть в Telegram и скачать</h3><p>${config.about}</p></div>`,
-    `<div class="faqCard"><h3>Что будет дальше</h3><p>${config.flow}</p></div>`,
+    `<div class="faqCard"><h3>Как открыть в Telegram и скачать</h3><p>${config.about}</p>${buildTelegramButtons(config)}</div>`,
     ...listCards,
     `<div class="faqCard"><h3>Навигация</h3><ul>${navLinks.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}</ul></div>`,
     cloudCard,
@@ -107,6 +130,10 @@ function renderFaq(config) {
 }
 
 function renderJsonLd(config) {
+  const el = document.querySelector("[data-jsonld]")
+  // JSON-LD is prerendered at build time; keep it intact for crawlers.
+  if (!el || el.textContent.trim()) return
+
   const graph = []
 
   graph.push({
@@ -148,8 +175,7 @@ function renderJsonLd(config) {
 
   const jsonLd = { "@context": "https://schema.org", "@graph": graph }
 
-  const el = document.querySelector("[data-jsonld]")
-  if (el) el.textContent = JSON.stringify(jsonLd)
+  el.textContent = JSON.stringify(jsonLd)
 }
 
 function resolveMediaType(mediaType) {
@@ -184,7 +210,8 @@ function resolveMovieLink(movie, config = {}) {
 
 function renderPopularMovies(config = {}) {
   const container = document.querySelector("[data-popular-movies]")
-  if (!container) return
+  // Popular lists are prerendered at build time; skip when already filled.
+  if (!container || container.children.length) return
 
   const source = Array.isArray(config.movies) ? config.movies : []
   const limit = Number.isFinite(config.limit) ? config.limit : source.length
@@ -220,9 +247,16 @@ function initIntentPage(config) {
 }
 
 function initFilmDownloadPage(config = {}) {
-  const rawMovies = Array.isArray(window.popularMovies) ? window.popularMovies : []
-  if (window.movieRoutes?.createMovieRouteMap && rawMovies.length) {
-    config.movieRoutesById = window.movieRoutes.createMovieRouteMap(rawMovies)
+  // movies.js declares `const popularMovies`, which is not exposed on `window`,
+  // so read it from the global lexical scope with a guard.
+  const fullMovieList =
+    typeof popularMovies !== "undefined" && Array.isArray(popularMovies)
+      ? popularMovies
+      : []
+  if (window.movieRoutes?.createMovieRouteMap && fullMovieList.length) {
+    config.movieRoutesById = window.movieRoutes.createMovieRouteMap(
+      fullMovieList,
+    )
   }
 
   const title = document.querySelector("[data-popular-movies-title]")

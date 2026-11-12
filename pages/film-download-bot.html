@@ -53,15 +53,16 @@
             <div class="faqCard"><h3>Что умеет бот</h3><p>Бот создан для поиска фильмов и сериалов. Работает в Telegram и не требует авторизации на внешних площадках.</p></div>
             <div class="faqCard"><h3>Какие запросы подходят</h3><p>Можно искать фильмы, сериалы и режиссёрские версии, в том числе редкие раздачи и нестандартные названия.</p></div>
             <div class="faqCard"><h3>Как выдаются результаты</h3><p>Бот находит фильмы и сериалы в разных форматах. Результаты выдаются в удобном формате прямо в Telegram.</p></div>
-            <div class="faqCard"><h3 data-popular-movies-title>Популярные фильмы недели</h3><ul data-popular-movies></ul></div>
+            <div class="faqCard"><h3 data-popular-movies-title>Популярные фильмы недели</h3><ul data-popular-movies><li><a href="/pages/about-movie/the-body">Тело</a></li><li><a href="/pages/about-movie/silo">Укрытие</a></li><li><a href="/pages/about-movie/obsession">Обсессия</a></li><li><a href="/pages/about-movie/michael">Майкл</a></li><li><a href="/pages/about-movie/vacanze-per-un-massacro">Резня на каникулах</a></li><li><a href="/pages/about-movie/toy-story-5">История игрушек 5</a></li><li><a href="/pages/about-movie/mortal-kombat-ii">Мортал Комбат 2</a></li><li><a href="/pages/about-movie/supergirl">Супергёрл</a></li><li><a href="/pages/about-movie/dune-part-three">Дюна: Часть третья</a></li><li><a href="/pages/about-movie/the-sheep-detectives">Следствие ведут овечки</a></li><li><a href="/pages/about-movie/the-mandalorian-and-grogu">Мандалорец и Грогу</a></li><li><a href="/pages/about-movie/the-super-mario-galaxy-movie">Супер Марио: Галактическое кино</a></li><li><a href="/pages/about-movie/disclosure-day">День разоблачения</a></li><li><a href="/pages/about-movie/voicemails-for-isabelle">Сообщения для Изабель</a></li><li><a href="/pages/about-movie/damage">Ущерб</a></li><li><a href="/pages/about-movie/peaky-blinders-the-immortal-man">Острые козырьки: бессмертный</a></li><li><a href="/pages/about-movie/project-hail-mary">Проект «Конец света»</a></li><li><a href="/pages/about-movie/avatar-fire-and-ash">Аватар: Пламя и пепел</a></li><li><a href="/pages/about-movie/shelter">Убежище</a></li><li><a href="/pages/about-movie/scream-7">Крик 7</a></li></ul></div>
             <div class="faqCard"><h3>Навигация</h3><ul>
                 <li><a href="/">Главная страница</a></li>
+                <li><a href="/pages/all-movies.html">Все фильмы и сериалы</a></li>
                 <li><a href="/pages/music-search-bot.html">Музыка</a></li>
                 <li><a href="/pages/audiobooks">Аудиокниги</a></li>
                 <li><a href="/pages/film-download-bot.html">Фильмы и сериалы</a></li>
-                <li><a href="/pages/chto-posmotret-vecherom">Что посмотреть вечером</a></li>
-                <li><a href="/pages/neochevidnye-filmy">Неочевидные фильмы</a></li>
-                <li><a href="/pages/filmy-kak">Фильмы как…</a></li>
+                <li><a href="/pages/chto-posmotret-vecherom.html">Что посмотреть вечером</a></li>
+                <li><a href="/pages/neochevidnye-filmy.html">Неочевидные фильмы</a></li>
+                <li><a href="/pages/filmy-kak.html">Фильмы как…</a></li>
                 <li><a href="/pages/game-search-bot.html">Игры</a></li>
                 <li><a href="/pages/file-search-bot.html">Любые файлы</a></li>
             </ul></div>
@@ -71,7 +72,7 @@
     <script>
         window.FILM_DOWNLOAD_PAGE_CONFIG = {
             title: 'Что скачать: популярные фильмы недели',
-            movies: window.popularMovies,
+            movies: typeof popularMovies !== 'undefined' ? popularMovies : [],
             limit: 20,
             emptyText: 'Список фильмов скоро обновится.',
             linkType: 'intent',

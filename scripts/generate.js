@@ -1,5 +1,6 @@
 const fs = require("fs")
 const path = require("path")
+const vm = require("vm")
 const { popularMovies } = require("../movies.js")
 const { popularAudiobooks = [] } = require("../audiobooks.js")
 const { popularGames = [] } = require("../games.js")
@@ -235,6 +236,7 @@ function resolveCollectionNavLinks() {
   })
 
   const extraLinks = [
+    { href: "/pages/all-movies.html", label: "Все фильмы и сериалы" },
     { href: "/pages/music-search-bot.html", label: "Поиск музыки" },
     { href: "/pages/audiobook-search-bot.html", label: "Поиск аудиокниг" },
     { href: "/pages/film-download-bot.html", label: "Поиск фильмов и сериалов" },
@@ -315,9 +317,9 @@ function pickTagCloudQueries(movie, limit = 20) {
 
   const scored = source
     .map((query) => {
-      const lowerQuery = query.toLowerCase()
+      const queryTokens = new Set(tokenize(query))
       const score = titleTokens.reduce(
-        (acc, token) => acc + (lowerQuery.includes(token) ? 1 : 0),
+        (acc, token) => acc + (queryTokens.has(token) ? 1 : 0),
         0,
       )
       return { query, score }
@@ -334,11 +336,250 @@ function pickTagCloudQueries(movie, limit = 20) {
   return uniqueNonEmpty([...scored, ...fallback]).slice(0, limit)
 }
 
+// ---------- Prerender helpers ----------
+// These mirror the runtime logic in seo-intent-page.js / section-index.js /
+// all-movies.js so the same content is baked into the static HTML at build
+// time. AI crawlers and search bots that do not execute JavaScript get the
+// full text, internal links and JSON-LD straight from the markup.
+
+const SCHEMA_TYPE_BY_MEDIA = {
+  movie: "Movie",
+  tv: "TVSeries",
+  aud: "Audiobook",
+  game: "VideoGame",
+  music: "MusicAlbum",
+  book: "Book",
+}
+
+const TELEGRAM_CARD_LINK_PREFIX = "https://t.me/DokopatychBot?start=searchTr-"
+
+function toJsonLdScript(json) {
+  const serialized = JSON.stringify(json).replace(/</g, "\\u003c")
+  return `<script type="application/ld+json" data-jsonld>${serialized}</script>`
+}
+
+function renderTelegramButtonsHtml(config) {
+  if (!config.webLink || !config.desktopLink) {
+    return ""
+  }
+
+  return `<div class="btns-container"><a href="${escapeHtml(config.webLink)}" class="start-btn" target="_blank" rel="noopener">WEB</a><a href="${escapeHtml(config.desktopLink)}" class="start-btn">DESKTOP</a></div>`
+}
+
+function renderListBlockHtml(block) {
+  if (!block || !Array.isArray(block.items) || !block.items.length) {
+    return ""
+  }
+
+  const title = escapeHtml(block.title || "Подборка")
+  const items = block.items
+    .map((item) => {
+      if (typeof item === "string") {
+        return `<li>${escapeHtml(item)}</li>`
+      }
+
+      if (item && item.href && item.label) {
+        return `<li><a href="${escapeHtml(encodeURI(item.href))}">${escapeHtml(item.label)}</a></li>`
+      }
+
+      return ""
+    })
+    .filter(Boolean)
+    .join("")
+
+  if (!items) {
+    return ""
+  }
+
+  return `<div class="faqCard"><h3>${title}</h3><ul>${items}</ul></div>`
+}
+
+function renderNavListHtml(navLinks) {
+  return `<ul>${navLinks
+    .map(
+      (link) =>
+        `<li><a href="${escapeHtml(encodeURI(link.href))}">${escapeHtml(link.label)}</a></li>`,
+    )
+    .join("")}</ul>`
+}
+
+function renderTagCloudCardHtml(config) {
+  const cloudItems = Array.isArray(config.tagCloudQueries)
+    ? config.tagCloudQueries
+    : []
+  if (!cloudItems.length) {
+    return ""
+  }
+
+  const title = escapeHtml(config.tagCloudTitle || "Облако запросов")
+  return `<div class="faqCard"><h3>${title}</h3><div class="neon-tag-cloud">${cloudItems
+    .map((query) => `<span class="neon-tag">${escapeHtml(query)}</span>`)
+    .join("")}</div></div>`
+}
+
+function renderFaqCardsHtml(config) {
+  const navLinks =
+    Array.isArray(config.navLinks) && config.navLinks.length
+      ? config.navLinks
+      : resolveCollectionNavLinks()
+
+  const cards = [
+    `<div class="faqCard"><h2>${config.h2}</h2><p>${config.description}</p></div>`,
+    `<div class="faqCard"><h3>Как открыть в Telegram и скачать</h3><p>${config.about}</p>${renderTelegramButtonsHtml(config)}</div>`,
+    ...(Array.isArray(config.listBlocks)
+      ? config.listBlocks.map(renderListBlockHtml).filter(Boolean)
+      : []),
+    `<div class="faqCard"><h3>Навигация</h3>${renderNavListHtml(navLinks)}</div>`,
+    renderTagCloudCardHtml(config),
+  ].filter(Boolean)
+
+  return cards.join("")
+}
+
+function renderPopularListHtml(items, { linkType = "deep", limit = 10 } = {}) {
+  return items
+    .filter((item) => item && (item.title || item.original_title))
+    .slice(0, limit)
+    .map((item) => {
+      const label = escapeHtml(item.title || item.original_title)
+      if (linkType === "intent") {
+        const href = normalizePagePath(`/pages/about-movie/${item.id}`)
+        return `<li><a href="${escapeHtml(encodeURI(href))}">${label}</a></li>`
+      }
+
+      return `<li><a href="${escapeHtml(movieDeepLink(item))}" target="_blank" rel="noopener">${label}</a></li>`
+    })
+    .join("")
+}
+
+function buildBreadcrumbGraph(breadcrumbs) {
+  if (!Array.isArray(breadcrumbs) || breadcrumbs.length < 2) {
+    return null
+  }
+
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbs
+      .filter((item) => item && item.name && item.url)
+      .map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.name,
+        item: item.url,
+      })),
+  }
+}
+
+function buildIntentJsonLd(config, movie = null) {
+  const graph = []
+
+  graph.push({
+    "@type": "WebPage",
+    "@id": config.url,
+    url: config.url,
+    name: config.title,
+    description: config.description,
+    inLanguage: "ru",
+  })
+
+  const breadcrumb = buildBreadcrumbGraph(config.breadcrumbs)
+  if (breadcrumb) {
+    graph.push(breadcrumb)
+  }
+
+  const faqItems = Array.isArray(config.faq) ? config.faq : []
+  if (faqItems.length) {
+    graph.push({
+      "@type": "FAQPage",
+      mainEntity: faqItems
+        .filter((item) => item && item.q && item.a)
+        .map((item) => ({
+          "@type": "Question",
+          name: String(item.q),
+          acceptedAnswer: { "@type": "Answer", text: String(item.a) },
+        })),
+    })
+  }
+
+  const schemaType = movie
+    ? SCHEMA_TYPE_BY_MEDIA[resolveMediaType(movie.media_type)]
+    : null
+  if (schemaType) {
+    const mediaNode = {
+      "@type": schemaType,
+      name: movie.title || movie.original_title,
+      description: config.description,
+      url: config.url,
+      inLanguage: "ru",
+    }
+
+    if (
+      movie.original_title &&
+      movie.original_title !== movie.title &&
+      /^[\x00-\x7F]+$/.test(movie.original_title)
+    ) {
+      mediaNode.alternateName = movie.original_title
+    }
+
+    if (movie.release_date) {
+      mediaNode.datePublished = movie.release_date
+    }
+
+    graph.push(mediaNode)
+  }
+
+  return { "@context": "https://schema.org", "@graph": graph }
+}
+
+function buildSectionIndexJsonLd(config) {
+  const graph = []
+
+  graph.push({
+    "@type": "WebPage",
+    "@id": config.canonical,
+    url: config.canonical,
+    name: config.title,
+    description: config.description,
+    inLanguage: "ru",
+  })
+
+  graph.push({
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { name: "Докопатыч", url: toAbsoluteUrl("/") },
+      { name: config.h1 || config.title, url: config.canonical },
+    ].map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  })
+
+  const items = Array.isArray(config.items) ? config.items : []
+  if (items.length) {
+    graph.push({
+      "@type": "ItemList",
+      itemListElement: items
+        .filter((item) => item && item.href && item.label)
+        .map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: toAbsoluteUrl(item.href),
+          name: item.label,
+        })),
+    })
+  }
+
+  return { "@context": "https://schema.org", "@graph": graph }
+}
+
 function buildIntentConfig(movie, tagCloudQueries, movieRoutesById, options = {}) {
   const quotedTitle = `«${movie.title}»`
   const media = resolveMediaCopy(movie.media_type)
   const queryHighlights = tagCloudQueries.slice(0, 6)
   const link = movieDeepLink(movie, options)
+  const desktopLink = movieDesktopDeepLink(movie, options)
   const mediaType = resolveMediaType(movie.media_type)
   const h2LabelByType = {
     movie: "Фильм",
@@ -387,6 +628,8 @@ function buildIntentConfig(movie, tagCloudQueries, movieRoutesById, options = {}
     queryExample: `скачать ${media.nounAccusative} ${movie.title}`,
     about: `<a href="${link}">Открыть ${media.nounAccusative} ${quotedTitle}</a> можно через Telegram‑бота: он запускается сразу с нужным запросом.`,
     aboutText,
+    webLink: link,
+    desktopLink,
     queries: queryHighlights.length
       ? `Часто ищут так: ${queryHighlights.join(", ")}.`
       : `Часто ищут так: скачать ${media.nounAccusative} ${movie.title}, ${movie.title} ${media.nounAccusative} скачать, ${movie.title} Telegram.`,
@@ -436,16 +679,19 @@ function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
     movieRoutesById,
     options,
   )
+  const relatedItems = source
+    .filter((item) => item.id !== movie.id)
+    .map((item) =>
+      options.linkType === "intent"
+        ? mapMovieForIntentLink(item, movieRoutesById)
+        : item,
+    )
+  const relatedItemsForIntent = JSON.stringify(relatedItems)
+  const popularListHtml = renderPopularListHtml(relatedItems, {
+    linkType: options.linkType || "deep",
+    limit: 10,
+  })
   const configJson = JSON.stringify(config)
-  const relatedItemsForIntent = JSON.stringify(
-    source
-      .filter((item) => item.id !== movie.id)
-      .map((item) =>
-        options.linkType === "intent"
-          ? mapMovieForIntentLink(item, movieRoutesById)
-          : item,
-      ),
-  )
 
   return `<!doctype html>
 <html lang="ru">
@@ -460,13 +706,17 @@ function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
     <meta property="og:site_name" content="Докопатыч" />
     <meta property="og:description" content="${escapeHtml(config.description)}" />
     <meta property="og:image" content="https://dokopatych.vercel.app/images/square.webp" />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="1024" />
+    <meta property="og:locale" content="ru_RU" />
     <meta property="og:url" content="${escapeHtml(config.url)}" />
     <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="${escapeHtml(config.url)}">
     <link rel="icon" href="https://dokopatych.vercel.app/images/round-sm.ico" type="image/x-icon">
     <link rel="shortcut icon" href="https://dokopatych.vercel.app/images/round-sm.ico" />
     <link rel="stylesheet" href="${rootAsset("styles")}" />
-    <script type="application/ld+json" data-jsonld></script>
+    ${toJsonLdScript(buildIntentJsonLd(config, movie))}
 
 </head>
 <body>
@@ -482,9 +732,9 @@ function buildMoviePageHtml(movie, movieRoutesById, options = {}) {
                 <a href="${movieDesktopDeepLink(movie, options)}" class="start-btn">DESKTOP</a>
             </div>
         </div>
-        <div class="faq" data-faq></div>
+        <div class="faq" data-faq>${renderFaqCardsHtml(config)}</div>
         <div class="faq">
-            <div class="faqCard"><h3>${escapeHtml(config.popularTitle)}</h3><ul data-popular-movies></ul></div>
+            <div class="faqCard"><h3>${escapeHtml(config.popularTitle)}</h3><ul data-popular-movies>${popularListHtml}</ul></div>
         </div>
     </div>
     <script src="${rootAsset("movies")}"></script>
@@ -567,6 +817,14 @@ function buildSectionIndexPageHtml(collection, items, routesById) {
     return ""
   }
 
+  const listHtml = (config.items || [])
+    .map(
+      (item) =>
+        `<li><a href="${escapeHtml(encodeURI(item.href))}">${escapeHtml(item.label)}</a></li>`,
+    )
+    .join("")
+  const navHtml = renderNavListHtml(config.navLinks)
+
   return `<!doctype html>
 <html lang="ru">
 <head>
@@ -579,13 +837,17 @@ function buildSectionIndexPageHtml(collection, items, routesById) {
     <meta property="og:site_name" content="Докопатыч" />
     <meta property="og:description" content="${escapeHtml(config.description)}" />
     <meta property="og:image" content="https://dokopatych.vercel.app/images/square.webp" />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="1024" />
+    <meta property="og:locale" content="ru_RU" />
     <meta property="og:url" content="${escapeHtml(config.canonical)}" />
     <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="${escapeHtml(config.canonical)}">
     <link rel="icon" href="https://dokopatych.vercel.app/images/round-sm.ico" type="image/x-icon">
     <link rel="shortcut icon" href="https://dokopatych.vercel.app/images/round-sm.ico" />
     <link rel="stylesheet" href="${rootAsset("styles")}" />
-    <script type="application/ld+json" data-jsonld></script>
+    ${toJsonLdScript(buildSectionIndexJsonLd(config))}
 </head>
 <body>
     <div class="backGround"></div>
@@ -602,11 +864,11 @@ function buildSectionIndexPageHtml(collection, items, routesById) {
             </div>
             <div class="faqCard">
                 <h3>${escapeHtml(config.listTitle || "Популярное")}</h3>
-                <ul data-section-list></ul>
+                <ul data-section-list>${listHtml}</ul>
             </div>
             <div class="faqCard">
                 <h3>Навигация</h3>
-                <ul data-section-nav></ul>
+                <ul data-section-nav>${navHtml}</ul>
             </div>
         </div>
     </div>
@@ -728,11 +990,406 @@ function writeCollectionPages() {
   })
 }
 
+// ---------- Prerender of hand-written pages ----------
+// Hand-written pages keep their runtime configs, but the rendered markup and
+// JSON-LD are refreshed into the static HTML on every build. Content is
+// replaced in place, so repeated builds stay up to date.
+
+function extractObjectLiteral(source, marker) {
+  const markerIndex = source.indexOf(marker)
+  if (markerIndex === -1) return null
+  const start = source.indexOf("{", markerIndex)
+  if (start === -1) return null
+
+  let depth = 0
+  let inString = false
+  let quote = ""
+  let escaped = false
+
+  for (let i = start; i < source.length; i += 1) {
+    const char = source[i]
+
+    if (inString) {
+      if (escaped) {
+        escaped = false
+      } else if (char === "\\") {
+        escaped = true
+      } else if (char === quote) {
+        inString = false
+      }
+      continue
+    }
+
+    if (char === "'" || char === '"' || char === "`") {
+      inString = true
+      quote = char
+      continue
+    }
+
+    if (char === "{") {
+      depth += 1
+    }
+
+    if (char === "}") {
+      depth -= 1
+      if (depth === 0) {
+        return source.slice(start, i + 1)
+      }
+    }
+  }
+
+  return null
+}
+
+function parseIntentsConfig(html) {
+  const objectLiteral = extractObjectLiteral(html, "window.INTENT_PAGE_CONFIG")
+  if (!objectLiteral) return null
+
+  const sandbox = { window: {} }
+  try {
+    vm.createContext(sandbox)
+    vm.runInContext(`window.INTENT_PAGE_CONFIG = (${objectLiteral})`, sandbox, {
+      timeout: 500,
+    })
+  } catch (error) {
+    console.warn(`  ! INTENT_PAGE_CONFIG parse failed: ${error.message}`)
+    return null
+  }
+
+  return sandbox.window.INTENT_PAGE_CONFIG
+}
+
+function replaceElementInnerContent(source, startTag, innerContent, tagName) {
+  const startIndex = source.indexOf(startTag)
+  if (startIndex === -1) return source
+  const contentStart = startIndex + startTag.length
+
+  const openTag = `<${tagName}`
+  const closeTag = `</${tagName}>`
+  let depth = 1
+  let cursor = contentStart
+
+  while (cursor < source.length) {
+    const nextOpen = source.indexOf(openTag, cursor)
+    const nextClose = source.indexOf(closeTag, cursor)
+
+    if (nextClose === -1) return source
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      depth += 1
+      cursor = nextOpen + openTag.length
+      continue
+    }
+
+    depth -= 1
+    cursor = nextClose + closeTag.length
+    if (depth === 0) {
+      const closeStart = nextClose
+      return (
+        source.slice(0, contentStart) +
+        innerContent +
+        source.slice(closeStart)
+      )
+    }
+  }
+
+  return source
+}
+
+function replaceJsonLdScript(source, json) {
+  const pattern = /(<script type="application\/ld\+json" data-jsonld>)[\s\S]*?(<\/script>)/
+  if (!pattern.test(source)) return source
+  const serialized = JSON.stringify(json).replace(/</g, "\\u003c")
+  return source.replace(pattern, `$1${serialized}$2`)
+}
+
+function prerenderIntentPageHtml(html) {
+  const config = parseIntentsConfig(html)
+  if (!config || !config.h2 || !config.description) {
+    return { html, changed: false }
+  }
+
+  let nextHtml = html
+  let changed = false
+
+  // JSON-LD first: filling the FAQ below adds card headings that would
+  // otherwise trip static-content heuristics.
+  if (/<script type="application\/ld\+json" data-jsonld><\/script>/.test(nextHtml)) {
+    // Keep a single FAQPage per page: some pages ship their own static schema.
+    const configForSchema = html.includes('"FAQPage"')
+      ? { ...config, faq: [] }
+      : config
+    nextHtml = replaceJsonLdScript(nextHtml, buildIntentJsonLd(configForSchema))
+    changed = true
+  }
+
+  if (nextHtml.includes('<div class="faq" data-faq>')) {
+    nextHtml = replaceElementInnerContent(
+      nextHtml,
+      '<div class="faq" data-faq>',
+      renderFaqCardsHtml(config),
+      "div",
+    )
+    changed = true
+  }
+
+  return { html: nextHtml, changed }
+}
+
+function prerenderIntentPages() {
+  const entries = fs
+    .readdirSync(PAGES_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".html"))
+
+  let count = 0
+  entries.forEach((entry) => {
+    const filePath = path.join(PAGES_DIR, entry.name)
+    const html = fs.readFileSync(filePath, "utf8")
+    if (!html.includes("window.INTENT_PAGE_CONFIG")) return
+
+    const { html: nextHtml, changed } = prerenderIntentPageHtml(html)
+    if (changed) {
+      fs.writeFileSync(filePath, nextHtml)
+      count += 1
+    }
+  })
+
+  if (count) {
+    console.log(`Prerendered content into ${count} intent pages.`)
+  }
+}
+
+function truncateOverview(text, limit = 200) {
+  const clean = String(text || "").replace(/\s+/g, " ").trim()
+  if (clean.length <= limit) {
+    return clean
+  }
+
+  const cut = clean.slice(0, limit)
+  const spaceIndex = cut.lastIndexOf(" ")
+  return `${cut.slice(0, spaceIndex > 0 ? spaceIndex : limit)}…`
+}
+
+function prerenderAllMoviesPage() {
+  const filePath = path.join(PAGES_DIR, "all-movies.html")
+  if (!fs.existsSync(filePath)) return
+
+  let html = fs.readFileSync(filePath, "utf8")
+  const movies = flattenPopularItems(popularMovies, "movie").filter(
+    (movie) => movie.title,
+  )
+  const routesById = createMovieRouteMap(movies)
+  const pageHrefById = new Map(
+    movies.map((movie) => [
+      movie.id,
+      routesById.get(movie.id)?.urlPath ||
+        normalizePagePath(`/pages/about-movie/${movie.id}`),
+    ]),
+  )
+
+  const cardsHtml = movies
+    .map((movie) => {
+      const mediaType = movie.media_type === "tv" ? "tv" : "movie"
+      const label = mediaType === "tv" ? "Сериал" : "Фильм"
+      const year = String(movie.release_date || "").slice(0, 4)
+      const title = movie.title || movie.original_title
+      const original =
+        movie.original_title && movie.original_title !== movie.title
+          ? movie.original_title
+          : ""
+      const deepLink = `${TELEGRAM_CARD_LINK_PREFIX}${movie.id}-${mediaType}-lnd`
+      const pageHref = pageHrefById.get(movie.id)
+
+      return `<article class="movieCard">
+            <div class="movieCardHead">
+                <span class="movieCardBadge">${escapeHtml(label)}</span>
+                ${year ? `<span class="movieCardYear">${escapeHtml(year)}</span>` : ""}
+            </div>
+            <h3 class="movieCardTitle">${escapeHtml(title)}</h3>
+            ${original ? `<p class="movieCardOriginal">${escapeHtml(original)}</p>` : ""}
+            <p class="movieCardText">${escapeHtml(truncateOverview(movie.overview))}</p>
+            <div class="movieCardActions">
+                <a class="start-btn" href="${escapeHtml(deepLink)}" target="_blank" rel="noopener">TELEGRAM</a>
+                <a class="movieCardLink" href="${escapeHtml(encodeURI(pageHref))}">Страница →</a>
+            </div>
+        </article>`
+    })
+    .join("")
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${BASE_URL}/pages/all-movies.html`,
+        url: `${BASE_URL}/pages/all-movies.html`,
+        name: "Все фильмы и сериалы — карточки каталога | Докопатыч",
+        inLanguage: "ru",
+      },
+      {
+        "@type": "ItemList",
+        itemListElement: movies.slice(0, 100).map((movie, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: movie.title || movie.original_title,
+          url: encodeURI(`${BASE_URL}${pageHrefById.get(movie.id)}`),
+        })),
+      },
+    ],
+  }
+
+  let changed = false
+
+  if (html.includes("<span data-movies-count>")) {
+    html = html.replace(
+      /(<span data-movies-count>)[\s\S]*?(<\/span>)/,
+      `$1${movies.length} позиций$2`,
+    )
+    changed = true
+  }
+
+  if (html.includes('<div class="movieCards" data-movie-cards>')) {
+    html = replaceElementInnerContent(
+      html,
+      '<div class="movieCards" data-movie-cards>',
+      cardsHtml,
+      "div",
+    )
+    changed = true
+  }
+
+  const withJsonLd = replaceJsonLdScript(html, jsonLd)
+  if (withJsonLd !== html) {
+    html = withJsonLd
+    changed = true
+  }
+
+  if (changed) {
+    fs.writeFileSync(filePath, html)
+    console.log(`Prerendered ${movies.length} cards into all-movies.html.`)
+  }
+}
+
+function prerenderFilmDownloadPage() {
+  const filePath = path.join(PAGES_DIR, "film-download-bot.html")
+  if (!fs.existsSync(filePath)) return
+
+  let html = fs.readFileSync(filePath, "utf8")
+  if (!html.includes("<ul data-popular-movies>")) return
+
+  const movies = flattenPopularItems(popularMovies, "movie").filter(
+    (movie) => movie.title,
+  )
+  const routesById = createMovieRouteMap(movies)
+  const listHtml = movies
+    .slice(0, 20)
+    .map((movie) => {
+      const href =
+        routesById.get(movie.id)?.urlPath ||
+        normalizePagePath(`/pages/about-movie/${movie.id}`)
+      return `<li><a href="${escapeHtml(encodeURI(href))}">${escapeHtml(movie.title || movie.original_title)}</a></li>`
+    })
+    .join("")
+
+  const nextHtml = replaceElementInnerContent(
+    html,
+    "<ul data-popular-movies>",
+    listHtml,
+    "ul",
+  )
+
+  if (nextHtml !== html) {
+    fs.writeFileSync(filePath, nextHtml)
+    console.log("Prerendered popular movies into film-download-bot.html.")
+  }
+}
+
+// ---------- llms.txt ----------
+
+function decodeHtmlEntities(value) {
+  return String(value)
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+}
+
+function extractPageMeta(html) {
+  const title =
+    html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.trim().replace(/\s+/g, " ") ||
+    ""
+  const description =
+    html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1] || ""
+
+  return {
+    title: decodeHtmlEntities(title),
+    description: decodeHtmlEntities(description),
+  }
+}
+
+function writeLlmsTxt() {
+  const groups = [
+    { dir: null, title: "Основные страницы", pages: [] },
+    { dir: "about-movie", title: "Каталог фильмов и сериалов", pages: [] },
+    { dir: "audiobooks", title: "Аудиокниги", pages: [] },
+    { dir: "games", title: "Игры", pages: [] },
+    { dir: "music", title: "Музыкальные альбомы", pages: [] },
+    { dir: "books", title: "Книги", pages: [] },
+  ]
+  const groupByDir = new Map(
+    groups.filter((group) => group.dir).map((group) => [group.dir, group]),
+  )
+
+  const addPage = (relativePath, html) => {
+    const meta = extractPageMeta(html)
+    if (!meta.title) return
+
+    const url = encodeURI(toAbsoluteUrl(`/${relativePath}`))
+    const match = relativePath.match(/^pages\/([^/]+)\/(index\.html|[^/]+\/index\.html)$/)
+
+    if (match && groupByDir.has(match[1]) && match[2] !== "index.html") {
+      groupByDir.get(match[1]).pages.push({ url, ...meta })
+    } else {
+      groups[0].pages.push({ url, ...meta })
+    }
+  }
+
+  const rootHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8")
+  groups[0].pages.push({ url: encodeURI(`${BASE_URL}/`), ...extractPageMeta(rootHtml) })
+
+  readAllHtmlPages(PAGES_DIR, { withPaths: true }).forEach(({ relativePath }) => {
+    const filePath = path.join(ROOT, relativePath)
+    addPage(relativePath, fs.readFileSync(filePath, "utf8"))
+  })
+
+  const lines = [
+    "# Докопатыч — Telegram-бот для поиска фильмов, сериалов, музыки, аудиокниг, игр и файлов",
+    "",
+    "> Бесплатный Telegram-бот @DokopatychBot: пользователь присылает название фильма, сериала, альбома, аудиокниги, игры или любого файла — бот находит варианты и присылает подборки похожего. Небольшие файлы скачиваются прямо в боте, для больших бот отдаёт торрент-файл. Данные о фильмах и сериалах — из TMDB.",
+    "",
+    "Сайт dokopatych.vercel.app — лендинг и каталоги бота. Каждая позиция каталога имеет отдельную страницу с описанием и быстрой ссылкой на поиск в боте.",
+    "",
+  ]
+
+  groups.forEach((group) => {
+    if (!group.pages.length) return
+
+    lines.push(`## ${group.title}`, "")
+    group.pages.forEach((page) => {
+      lines.push(`- [${page.title}](${page.url})${page.description ? `: ${page.description}` : ""}`)
+    })
+    lines.push("")
+  })
+
+  fs.writeFileSync(path.join(ROOT, "llms.txt"), `${lines.join("\n").trimEnd()}\n`)
+}
+
 function isIndexablePage(relativePath) {
   return !NON_INDEXED_PAGE_PATTERNS.some((pattern) => pattern.test(relativePath))
 }
 
-function readAllHtmlPages(dir = PAGES_DIR) {
+function readAllHtmlPages(dir = PAGES_DIR, options = {}) {
   if (!fs.existsSync(dir)) {
     return []
   }
@@ -741,7 +1398,7 @@ function readAllHtmlPages(dir = PAGES_DIR) {
     const entryPath = path.join(dir, entry.name)
 
     if (entry.isDirectory()) {
-      return readAllHtmlPages(entryPath)
+      return readAllHtmlPages(entryPath, options)
     }
 
     if (!entry.isFile() || !entry.name.endsWith(".html")) {
@@ -751,6 +1408,10 @@ function readAllHtmlPages(dir = PAGES_DIR) {
     const relativePath = path.relative(ROOT, entryPath).split(path.sep).join("/")
     if (!isIndexablePage(relativePath)) {
       return []
+    }
+
+    if (options.withPaths) {
+      return [{ relativePath }]
     }
 
     if (relativePath === "index.html") {
@@ -782,7 +1443,7 @@ function sortUrlsBySection(urls) {
 }
 
 function buildSitemapEntry({ loc, changefreq, priority }) {
-  return `  <url><loc>${loc}</loc><lastmod>${TODAY}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
+  return `  <url><loc>${encodeURI(loc)}</loc><lastmod>${TODAY}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
 }
 
 function writeSitemap() {
@@ -818,9 +1479,13 @@ function writeLinksList() {
 
 const flatPopularMovies = flattenPopularItems(popularMovies, "movie")
 writeCollectionPages()
+prerenderIntentPages()
+prerenderAllMoviesPage()
+prerenderFilmDownloadPage()
 writeSitemap()
 writeLinksList()
+writeLlmsTxt()
 
 console.log(
-  `Generated ${flatPopularMovies.length} SEO pages, refreshed sitemap, and wrote links list.`,
+  `Generated ${flatPopularMovies.length} SEO pages, refreshed sitemap, llms.txt, and wrote links list.`,
 )
